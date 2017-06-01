@@ -1,0 +1,16 @@
+.example-icon {
+  padding: 0 14px;
+}
+
+.example-spacer {
+  flex: 1 1 auto;
+}
+
+md-toolbar.mat-toolbar {
+    min-height: 30px;  
+}
+
+md-toolbar-row.mat-toolbar-row {
+     min-height: 30px;
+     height: 30px;
+}
