@@ -1,0 +1,7 @@
+---
+
+# Setup docker engine  
+- hosts: docker-hosts
+  become: true
+  roles:
+    - { role: pauvos.docker-engine }
