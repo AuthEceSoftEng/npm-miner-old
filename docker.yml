@@ -1,12 +1,12 @@
 ---
 
 # Setup docker engine
-- hosts: docker-hosts
-  become: true
-  roles:
-    - { role: pauvos.docker-engine }
-  vars:
-    docker_engine_cache_valid_time: 160000
+#- hosts: docker-hosts
+#  become: true
+#  roles:
+#    - { role: pauvos.docker-engine }
+#  vars:
+#    docker_engine_cache_valid_time: 160000
 
 - hosts: npm-web
   roles:
