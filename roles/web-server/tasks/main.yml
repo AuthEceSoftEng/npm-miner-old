@@ -1,0 +1,13 @@
+---
+# Setups node-docker image
+
+- name: pull node
+  docker_image:
+    name: joenyland/express-hello-world
+
+- name: start hello world
+  docker_container:
+    name: hello-world
+    image: joenyland/express-hello-world
+    ports:
+      - "8080:8080"
