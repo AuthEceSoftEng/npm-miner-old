@@ -12,19 +12,21 @@
   },
   "lint-staged": {
     "gitDir": "../",
-    "src/**/*.{js,jsx,json,css}": [
-      "prettier --single-quote --write",
-      "git add"
-    ]
+    "linters": {
+      "src/**/*.{js,jsx,json,css}": [
+        "prettier --single-quote --write",
+        "git add"
+      ]
+    }
   },
-  "scripts": {
-    "precommit": "lint-staged",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
-  },
-  "devDependencies": {
-    "eslint-config-prettier": "^2.6.0"
+    "scripts": {
+      "precommit": "lint-staged",
+      "start": "react-scripts start",
+      "build": "react-scripts build",
+      "test": "react-scripts test --env=jsdom",
+      "eject": "react-scripts eject"
+    },
+    "devDependencies": {
+      "eslint-config-prettier": "^2.6.0"
+    }
   }
-}
