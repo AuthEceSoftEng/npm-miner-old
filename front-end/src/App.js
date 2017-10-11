@@ -1,15 +1,32 @@
 import React, { Component } from 'react';
-import Typography from 'material-ui/Typography';
+import Header from './Header';
 import Grid from 'material-ui/Grid';
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <Typography>
-        <h1>HELLO THERE!!</h1>
-        </Typography>
-      </div>
+      <Grid
+        container
+        direction="column"
+        justify="center"
+        align="center"
+      >
+        <Grid item>
+          <Header />
+        </Grid>
+        <Grid item>
+
+        </Grid>
+        <Grid item>
+
+        </Grid>
+        <Grid item>
+          <h1>Test</h1>
+        </Grid>
+        <Grid item>
+          <h1>Test</h1>
+        </Grid>
+      </Grid>
     );
   }
 }
