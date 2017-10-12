@@ -58,3 +58,6 @@ typings/
 .env
 
 docker.retry
+
+# editors
+.vscode
