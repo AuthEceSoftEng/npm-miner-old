@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "bootstrap": "^4.0.0-beta",
     "husky": "^0.14.3",
     "lint-staged": "^4.2.3",
-    "material-ui": "^1.0.0-beta.16",
-    "material-ui-icons": "^1.0.0-beta.15",
     "prettier": "^1.7.4",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-scripts": "1.0.14",
+    "reactstrap": "^5.0.0-alpha.3",
     "typeface-roboto": "0.0.35"
   },
   "lint-staged": {
