@@ -1,0 +1,123 @@
+
+/*-----------------------------------------------------------------------------
+* 1.0 Reset
+* -----------------------------------------------------------------------------
+*/
+html, body, div, span, applet, object, iframe, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding-top: 0;
+  vertical-align: baseline;
+  border: 0;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+  font-family: "Lato", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+html,
+body {
+  width: 100%;
+  position: relative;
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #ffffff;
+  /*color: #525252;*/
+  color: rgba(0, 0, 0, 0.87);
+  font-family: "Lato", Helvetica, Arial, sans-serif;
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+*,
+*:before,
+*:after {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+article,
+aside,
+figcaption,
+figure,
+footer,
+header,
+main,
+nav,
+section {
+  display: block;
+}
+
+ol,
+ul {
+  list-style: none;
+}
+
+table {
+  word-wrap: break-word;
+	border-collapse: separate;
+	border-spacing: 0;
+}
+
+caption,
+th,
+td {
+	font-weight: normal;
+	text-align: left;
+}
+
+embed,
+iframe,
+object,
+video {
+  max-width: 100%;
+}
+
+a {
+  background-color: transparent;
+  color: #337ab7;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a:hover,
+a:focus,
+a:active,
+a:visited {
+  text-decoration: none;
+  outline: 0;
+}
+
+a:visited {
+  color: #1970BD;
+}
+
+a:hover {
+  color: #1970BD;
+  text-decoration: underline;
+}
+
+a img {
+  border: 0;
+}

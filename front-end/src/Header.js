@@ -1,49 +1,34 @@
 import React, { Component } from 'react';
-import {
-  Collapse,
-  Navbar,
-  NavbarToggler,
-  NavbarBrand,
-  Nav,
-  NavItem,
-  NavLink
-} from 'reactstrap';
+// import { Button } from 'react-bootstrap';
+import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
+import styled from 'styled-components';
 // import logo from './logo.svg';
 
-class Header extends Component {
-  constructor(props) {
-    super(props);
+const HeaderWrapper = styled.div`
+  // margin: 10, 10, 10, 10;
+  // background: #c6c6c6;
+`;
 
-    this.toggle = this.toggle.bind(this);
-    this.state = {
-      isOpen: false
-    };
-  }
-  toggle() {
-    this.setState({
-      isOpen: !this.state.isOpen
-    });
-  }
+class Header extends Component {
   render() {
     return (
-      <div>
-        <Navbar color="primary" dark expand="md">
-          <NavbarBrand href="/">Npm-miner</NavbarBrand>
-          <NavbarToggler onClick={this.toggle} />
-          <Collapse isOpen={this.state.isOpen} navbar>
-            <Nav className="ml-auto" navbar>
-              <NavItem>
-                <NavLink>Menu</NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink >
-                  Logout
-                </NavLink>
-              </NavItem>
-            </Nav>
-          </Collapse>
+      <HeaderWrapper>
+        <Navbar inverse>
+          <Navbar.Header>
+            <Navbar.Brand>
+              <a href="#">Npm-Miner</a>
+            </Navbar.Brand>
+          </Navbar.Header>
+          <Nav  pullRight bsStyle="pills">
+            <NavItem eventKey={1} href="#">
+              Link
+            </NavItem>
+            <NavItem eventKey={2} href="#">
+              Link
+            </NavItem>
+          </Nav>
         </Navbar>
-      </div>
+      </HeaderWrapper>
     );
   }
 }
