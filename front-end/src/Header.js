@@ -5,26 +5,38 @@ import styled from 'styled-components';
 // import logo from './logo.svg';
 
 const HeaderWrapper = styled.div`
-  // margin: 10, 10, 10, 10;
-  // background: #c6c6c6;
+  .navbar,
+  .navbar-default {
+    background: mediumseagreen;
+  }
+  .navbar-header {
+  }
+  a.navbar-brand {
+    color: #ffffff;
+    font-weight: 900;
+  }
+
+  .navbar-default .navbar-nav > li > a {
+    color: #ffffff;
+  }
 `;
 
 class Header extends Component {
   render() {
     return (
       <HeaderWrapper>
-        <Navbar inverse>
+        <Navbar>
           <Navbar.Header>
             <Navbar.Brand>
               <a href="#">Npm-Miner</a>
             </Navbar.Brand>
           </Navbar.Header>
-          <Nav  pullRight bsStyle="pills">
+          <Nav pullRight>
             <NavItem eventKey={1} href="#">
-              Link
+              PlayGround
             </NavItem>
             <NavItem eventKey={2} href="#">
-              Link
+              About
             </NavItem>
           </Nav>
         </Navbar>

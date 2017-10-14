@@ -5,15 +5,15 @@ import styled from 'styled-components';
 
 
 const Main = styled.div`
-  // font-size: 1.5em;
-  // text-align: center;
-  // color: salmon;
-  // height: 100vh;
-  // display: flex;
-  // flex-direction: column;
-  // flex-wrap: nowrap;
-  // align-content: center;
-  // justify-content: space-between;
+  font-size: 1.5em;
+  text-align: center;
+  color: salmon;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: space-between;
 `;
 
 
