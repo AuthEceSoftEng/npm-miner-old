@@ -3,12 +3,12 @@ import React, { Component } from 'react';
 import { Navbar, Nav, NavItem } from 'react-bootstrap';
 import styled from 'styled-components';
 import logo from './logo.svg';
-import theme from './theme'
+// import theme from './theme'
 
 const HeaderWrapper = styled.div`
   .navbar,
   .navbar-default {
-    background: ${theme.colors.primary};
+    background: ${props => props.theme.colors.primary};
     font-size: 1.5em;
   }
   .navbar-brand {
@@ -19,12 +19,12 @@ const HeaderWrapper = styled.div`
     padding: 7px 14px;
   }
   .navbar-brand > a {
-    color: #ffffff;
+    color: ${props => props.theme.colors.typography};
     font-weight: 900;
   }
 
   .navbar-default .navbar-toggle .icon-bar {
-    background-color: #ffffff;
+    background-color: ${props => props.theme.colors.typography};
   }
 
   .navbar-default .navbar-toggle:hover,
@@ -34,7 +34,7 @@ const HeaderWrapper = styled.div`
   }
 
   .navbar-default .navbar-nav > li > a {
-    color: #ffffff;
+    color: ${props => props.theme.colors.typography}
   }
 `;
 

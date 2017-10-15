@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import theme from './theme'
 
 const FooterWrapper = styled.div`
-  background: ${theme.colors.primary};
-  color: white;
+  background: ${props => props.theme.colors.primary};
+  color: ${props => props.theme.colors.typography}
 `;
 
 class Footer extends Component {
