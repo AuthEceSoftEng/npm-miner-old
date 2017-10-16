@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import {
+  BrowserRouter as Router
+} from 'react-router-dom'
 import Header from './Header';
 import Footer from './Footer';
 import Content from './Content';
@@ -13,6 +16,7 @@ const Main = styled.div`
   flex-wrap: nowrap;
   align-content: center;
   justify-content: space-between;
+  font-family: 'Oxygen', sans-serif;
 `;
 
 class App extends Component {
@@ -25,15 +29,17 @@ class App extends Component {
   }
   render() {
     return (
-      <ThemeProvider theme={this.state.theme}>
-        <div>
-          <Main>
-            <Header />
-            <Content />
-            <Footer />
-          </Main>
-        </div>
-      </ThemeProvider>
+      <Router>
+        <ThemeProvider theme={this.state.theme}>
+          <div>
+            <Main>
+              <Header />
+              <Content />
+              <Footer />
+            </Main>
+          </div>
+        </ThemeProvider>
+      </Router>
     );
   }
 }

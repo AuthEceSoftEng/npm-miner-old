@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { Navbar, Nav, NavItem } from 'react-bootstrap';
 import styled from 'styled-components';
 import logo from './logo.svg';
-// import theme from './theme'
+import { Link } from 'react-router-dom';
 
 const HeaderWrapper = styled.div`
   .navbar,
@@ -33,8 +33,8 @@ const HeaderWrapper = styled.div`
     box-shadow: 2px 2px 5px grey;
   }
 
-  .navbar-default .navbar-nav > li > a {
-    color: ${props => props.theme.colors.typography}
+  .navbar-default .navbar-nav > li > a > a {
+    color: ${props => props.theme.colors.typography};
   }
 `;
 
@@ -45,15 +45,21 @@ class Header extends Component {
         <Navbar>
           <Navbar.Header>
             <Navbar.Brand>
-              <img src={logo} alt="" width="72" height="72" />
-              <a>Npm-Miner</a>
+              <Link to="/">
+                <img src={logo} alt="" width="72" height="72" />
+                <a>Npm-Miner</a>
+              </Link>
             </Navbar.Brand>
             <Navbar.Toggle />
           </Navbar.Header>
           <Navbar.Collapse>
             <Nav pullRight>
-              <NavItem>PlayGround</NavItem>
-              <NavItem>About</NavItem>
+              <NavItem>
+                <Link to="/playground">PlayGround</Link>
+              </NavItem>
+              <NavItem>
+                <Link to="/about">About</Link>
+              </NavItem>
             </Nav>
           </Navbar.Collapse>
         </Navbar>

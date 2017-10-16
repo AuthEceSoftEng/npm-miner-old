@@ -1,8 +1,12 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import theme from './theme'
+import theme from './theme';
+import { Route} from 'react-router-dom';
+import About from './About';
+import Playground from './Playground';
+import Main from './Main';
 
-const Main = styled.div`
+const ContentStyle = styled.div`
   color: ${theme.colors.typography};
   // border-style: solid;
   // border-width: 4px;
@@ -13,14 +17,11 @@ const Main = styled.div`
 class Content extends Component {
   render() {
     return (
-      <Main>
-        <h1>Hell0</h1>
-        <ul>
-          {Array.apply(0, Array(25)).map(function(x, i) {
-            return <li>{i}</li>
-          })}
-        </ul>
-      </Main>
+      <ContentStyle>
+        <Route exact path="/" component={Main} />
+        <Route exact path="/playground" component={Playground} />
+        <Route exact path="/about" component={About} />
+      </ContentStyle>
     );
   }
 }
