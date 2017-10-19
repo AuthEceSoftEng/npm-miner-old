@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
-import {
-  BrowserRouter as Router
-} from 'react-router-dom'
+import { BrowserRouter as Router } from 'react-router-dom';
 import Header from './scenes/Header/Header';
 import Footer from './scenes/Footer/Footer';
 import Content from './scenes/Content/Content';
-import styled, { ThemeProvider } from "styled-components";
-import theme from "./theme";
+import styled, { ThemeProvider } from 'styled-components';
+import theme from './theme';
 
 const Main = styled.div`
   text-align: center;
@@ -43,6 +41,5 @@ class App extends Component {
     );
   }
 }
-
 
 export default App;
