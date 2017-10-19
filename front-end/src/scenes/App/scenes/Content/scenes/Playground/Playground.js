@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import theme from '../../../../theme';
 
 const PlaygroundStyle = styled.div`
-  color: ${theme.colors.typography_dark};
+  color: ${props => props.theme.colors.typography_dark};
 `;
 
 class Playground extends Component {

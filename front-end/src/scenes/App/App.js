@@ -23,10 +23,10 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      name: 'React',
-      theme: theme
+      theme
     };
   }
+
   render() {
     return (
       <Router>
@@ -43,5 +43,6 @@ class App extends Component {
     );
   }
 }
+
 
 export default App;
