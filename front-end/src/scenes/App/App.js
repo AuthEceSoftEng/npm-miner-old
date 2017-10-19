@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import {
   BrowserRouter as Router
 } from 'react-router-dom'
-import Header from './Header';
-import Footer from './Footer';
-import Content from './Content';
+import Header from './scenes/Header/Header';
+import Footer from './scenes/Footer/Footer';
+import Content from './scenes/Content/Content';
 import styled, { ThemeProvider } from 'styled-components';
 import theme from './theme';
 

@@ -1,16 +1,13 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import theme from './theme';
+import theme from '../../theme';
 import { Route} from 'react-router-dom';
-import About from './About';
-import Playground from './Playground';
-import Main from './Main';
+import About from './scenes/About/About';
+import Playground from './scenes/Playground/Playground';
+import Main from './scenes/Main/Main';
 
 const ContentStyle = styled.div`
   color: ${theme.colors.typography};
-  // border-style: solid;
-  // border-width: 4px;
-  // border-color: red;
   flex: 1 0 auto;
 `;
 
