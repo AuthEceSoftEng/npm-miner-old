@@ -5,7 +5,7 @@ import {
 import Header from './scenes/Header/Header';
 import Footer from './scenes/Footer/Footer';
 import Content from './scenes/Content/Content';
-import styled, { ThemeProvider } from 'styled-components';
+import styled, { ThemeProvider } from "styled-components";
 import theme from "./theme";
 
 const Main = styled.div`
