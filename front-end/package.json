@@ -20,7 +20,7 @@
   "lint-staged": {
     "gitDir": "../",
     "linters": {
-      "**/*.{js,jsx,json}": ["prettier --single-quote --write", "git add"]
+      "**/*.{js,jsx,json, css}": ["prettier --single-quote --write", "git add"]
     }
   },
   "scripts": {
