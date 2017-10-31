@@ -21,9 +21,14 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      theme
+      theme,
+      analyzedPackage: {}
     };
   }
+
+  setAnalyzedPackage = foundPackage => {
+    this.setState({ analyzedPackage: foundPackage });
+  };
 
   render() {
     return (
@@ -32,7 +37,10 @@ class App extends Component {
           <div>
             <Main>
               <Header />
-              <Content />
+              <Content
+                setAnalyzedPackage={this.setAnalyzedPackage}
+                analyzedPackage={this.state.analyzedPackage}
+              />
               <Footer />
             </Main>
           </div>
