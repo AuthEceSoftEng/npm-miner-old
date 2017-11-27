@@ -14,12 +14,18 @@ jobs:
       # documented at https://circleci.com/docs/2.0/circleci-images/
       # - image: circleci/mongo:3.4.4
 
-    working_directory: ~/npm-miner/demo-server
+    working_directory: ~/npm-miner
 
     steps:
       - checkout
-      - run: npm install
+      #- run: cd demo-server && npm install
       # run tests!
-      - run: npm test
-
+      #- run: cd demo-server && npm test
+      - deploy:
+          name: Deploy Using Ansible
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              # ansible npm-web -m ping -i /etc/ansible/hosts
+              echo 'deploying'
+            fi
 
