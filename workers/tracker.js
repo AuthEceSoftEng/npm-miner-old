@@ -5,22 +5,23 @@ const Promise = require('bluebird');
 const consts = require('./consts');
 
 const logger = bunyan.createLogger({ name: 'tracker' });
-const npmdb = require('nano')('http://couchdb.npm-miner.com:5984/npm-registry');
+const npmdb = require('nano')('http://couchdb.npm-miner.com:5986/npm-registry');
 Promise.promisifyAll(npmdb);
-const meta = require('nano')('http://couchdb.npm-miner.com:5984/npm-meta');
+const meta = require('nano')('http://couchdb.npm-miner.com:5986/npm-meta');
 Promise.promisifyAll(meta);
 const url =
-  process.env.NPM_MINER_CLOUDAMQP_URL ||
+  'amqp://localhost' ||
+  process.env.CLOUDAMQP_URL ||
   'amqp://snf-782941.vm.okeanos.grnet.gr';
 
 let myConn;
 let channel;
-const limit = 500;
+const limit = 1400;
 const last_sequence_id = 'last_sequence';
 const q = 'filter';
 
 new CronJob(
-  '00 30 * * * *',
+  '00 38 * * * *',
   function() {
     let last_seq_doc;
     let last_seq;

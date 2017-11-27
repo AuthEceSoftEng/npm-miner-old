@@ -1,24 +1,8 @@
-const qin = 'filter';
-const qout = 'analysis';
-const url =
-  process.env.NPM_MINER_CLOUDAMQP_URL ||
-  'amqp://snf-782941.vm.okeanos.grnet.gr';
+//
+// Requires
+//
 const bunyan = require('bunyan');
-const logger = bunyan.createLogger({
-  name: 'worker',
-  streams: [
-    {
-      stream: process.stdout,
-      level: 'info'
-    },
-    {
-      path: './output.log',
-      level: 'info'
-    }
-  ]
-});
 const amqp = require('amqplib');
-const consts = require('./consts');
 const path = require('path');
 const fs = require('fs');
 const targz = require('targz');
@@ -27,10 +11,10 @@ const Promise = require('bluebird');
 const rimraf = require('rimraf');
 const _ = require('lodash');
 const GitHubApi = require('github');
-const npmdb = require('nano')('http://couchdb.npm-miner.com:5984/npm-registry');
+const npmdb = require('nano')('http://couchdb.npm-miner.com:5986/npm-registry');
 Promise.promisifyAll(npmdb);
 const npmpackages = require('nano')(
-  'http://couchdb.npm-miner.com:5984/npm-packages'
+  'http://couchdb.npm-miner.com:5986/npm-packages'
 );
 Promise.promisifyAll(npmpackages);
 const request = require('request-promise');
@@ -38,9 +22,45 @@ const shell = require('shelljs');
 const escomplex = require('escomplex');
 const { CLIEngine } = require('eslint');
 const glob = require('globby');
+const consts = require('./consts');
 
-const dest = './downloads';
+function makeid() {
+  var text = '';
+  var possible =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
+  for (var i = 0; i < 5; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
+
+//
+// Configuration and Variables
+//
+const pid = process.argv[2];
+const logger = bunyan.createLogger({
+  name: 'worker',
+  streams: [
+    {
+      stream: process.stdout,
+      level: 'info'
+    },
+    {
+      type: 'rotating-file',
+      path: `./output${pid}.log`,
+      level: 'info',
+      period: '1d', // daily rotation
+      count: 3 // keep 3 back copies
+    }
+  ]
+});
+const qin = 'filter';
+const url =
+  'amqp://localhost' ||
+  process.env.CLOUDAMQP_URL ||
+  'amqp://snf-782941.vm.okeanos.grnet.gr';
+const dest = `./downloads${pid}`;
 const github = new GitHubApi({
   version: '3.0.0',
   debug: false,
@@ -53,14 +73,11 @@ const github = new GitHubApi({
   },
   Promise: Promise
 });
-
 github.authenticate({
   type: 'oauth',
   token: process.env.GITHUB_TOKEN
 });
-
 const environments = ['es6'];
-
 const cli = new CLIEngine({
   envs: environments,
   useEslintrc: false,
@@ -98,6 +115,9 @@ const cli = new CLIEngine({
   }
 });
 
+//
+// Functions
+//
 function readCode(pathToCode) {
   if (fs.lstatSync(pathToCode).isDirectory()) {
     return {
@@ -149,6 +169,7 @@ function delay(t) {
   });
 }
 
+// Work, work, work
 amqp
   .connect(url)
   .then(conn => {
@@ -164,14 +185,14 @@ amqp
           msg => {
             if (msg !== null) {
               const job = JSON.parse(msg.content.toString());
-              console.log(job);
+              logger.info(`[1] Got job for package: ${job.package_name}`);
               return npmdb
                 .getAsync(job.package_name)
-                .delay(5000)
+                .delay(2000)
                 .then(doc => {
                   const package = {};
                   let localPath;
-                  logger.info(`Working with package: ${job.package_name}`);
+                  logger.info(`[2] Retrieved: ${doc._id}`);
                   if (
                     doc.name &&
                     doc.name === job.package_name &&
@@ -193,7 +214,7 @@ amqp
                     let user = split[3];
                     let repo = split[4];
                     logger.info(
-                      `1. Package name: ${package.name} user: ${user} repo: ${repo}`
+                      `[3] Package name: ${package.name} of user: ${user} in repo: ${repo}`
                     );
                     return github.repos
                       .getContent({
@@ -201,17 +222,16 @@ amqp
                         repo: repo,
                         path: 'package.json'
                       })
-                      .delay(1000)
                       .then(res => {
                         let download_url = res.data.download_url;
                         logger.info(
-                          `2. Downloading package.json from: ${download_url}`
+                          `[4] Downloading package.json from: ${download_url}`
                         );
                         return request({ uri: download_url, json: true });
                       })
                       .then(json => {
                         logger.info(
-                          `3. The package name in json is: ${json.name}`
+                          `[5] The package name in json is: ${json.name}`
                         );
                         if (json.name === package.name) {
                           return github.repos.get({
@@ -219,7 +239,7 @@ amqp
                             repo: repo
                           });
                         } else {
-                          package.error = 'missmatch';
+                          package.error = 'Missmatch betwwen npm and github';
                           return Promise.reject(
                             new Error({
                               message: 'missmatch',
@@ -231,7 +251,8 @@ amqp
                       })
                       .then(res => {
                         logger.info(
-                          `${user}/${repo}: ${res.data.stargazers_count}`
+                          `[6] Stars ${user}/${repo}: ${res.data
+                            .stargazers_count}`
                         );
                         if (
                           res.data.html_url.includes(user) &&
@@ -239,21 +260,21 @@ amqp
                         ) {
                           package.stars = res.data.stargazers_count;
                           logger.info(
-                            `4. Store package ${package.name} with ${res.data
+                            `[7] Store package ${package.name} with ${res.data
                               .stargazers_count} GitHub stars!`
                           );
                           return Promise.resolve('Starting the analysis');
                         } else {
-                          package.error = 'redirect';
+                          package.error = 'Redirect';
                           return Promise.reject(
                             new Error({ message: 'Redirect' })
                           );
                         }
                       })
                       .then(() => {
-                        mkdirp.sync('./downloads');
+                        mkdirp.sync(dest);
                         const url = package.latest_package_json.dist.tarball;
-                        logger.info(`Downloading tarball from: ${url}`);
+                        logger.info(`[8] Downloading tarball from: ${url}`);
                         let filename = url.substr(url.lastIndexOf('/'));
                         const tarzball = path.join(dest, filename);
                         const targetDir = path.join(
@@ -291,25 +312,48 @@ amqp
                         });
                       })
                       .then(() => {
-                        logger.info(`Starting analysis on ${package._id}`);
+                        logger.info(`[9] Starting analysis on ${package._id}`);
                         return glob(createGlobbyPattern(localPath), {
                           nodir: true
                         });
                       })
                       .then(paths => {
-                        logger.info(paths);
-                        logger.info(`eslint`);
-                        package.eslint = cli.executeOnFiles(paths);
-                        logger.info(`escomplex`);
+                        logger.info(`[10] Files identified: ${paths.length}`);
+                        logger.info(`[11] Running eslint`);
+                        let result = cli.executeOnFiles(paths);
+                        package.eslint = {
+                          errorCount: result.errorCount,
+                          warningCount: result.warningCount
+                        };
+                        logger.info(`[12] Running escomplex`);
                         const source = _.chain(paths)
                           .map(readCode)
                           .reject(['code', null])
                           .value();
-                        package.escomplex = escomplex.analyse(source, {
+                        let escomplexResult = escomplex.analyse(source, {
                           ignoreErrors: true
                         });
-                        logger.info(`nsp`);
-                        logger.info(localPath);
+                        let tlocp = _.sumBy(
+                          escomplexResult.reports,
+                          o => o.aggregate.sloc.physical
+                        );
+                        let tlocl = _.sumBy(
+                          escomplexResult.reports,
+                          o => o.aggregate.sloc.logical
+                        );
+                        package.escomplex = {
+                          firstOrderDensity: escomplexResult.firstOrderDensity,
+                          changeCost: escomplexResult.changeCost,
+                          coreSize: escomplexResult.coreSize,
+                          loc: escomplexResult.loc,
+                          cyclomatic: escomplexResult.cyclomatic,
+                          effort: escomplexResult.effort,
+                          params: escomplexResult.params,
+                          maintainability: escomplexResult.maintainability,
+                          tlocp,
+                          tlocl
+                        };
+                        logger.info(`[13] Running nsp`);
                         const nspAnalysis = shell.exec(
                           `./node_modules/.bin/nsp check ${path.join(
                             localPath,
@@ -317,50 +361,12 @@ amqp
                           )} --reporter json`,
                           { silent: true }
                         ).stdout;
-                        logger.info(nspAnalysis);
                         if (nspAnalysis) {
-                          package.nsp = JSON.parse(nspAnalysis);
+                          package.nsp = JSON.parse(nspAnalysis).length;
                         } else {
-                          package.nsp = [];
+                          package.nsp = 0;
                         }
-                        logger.info(`Cleaning up`);
-                        rimraf.sync(dest);
-                        return npmpackages.getAsync(job.package_name);
-                      })
-                      .then(() => {
-                        logger.info(`Starting analysis on ${package._id}`);
-                        return glob(createGlobbyPattern(localPath), {
-                          nodir: true
-                        });
-                      })
-                      .then(paths => {
-                        logger.info(paths);
-                        logger.info(`eslint`);
-                        package.eslint = cli.executeOnFiles(paths);
-                        logger.info(`escomplex`);
-                        const source = _.chain(paths)
-                          .map(readCode)
-                          .reject(['code', null])
-                          .value();
-                        package.escomplex = escomplex.analyse(source, {
-                          ignoreErrors: true
-                        });
-                        logger.info(`nsp`);
-                        logger.info(localPath);
-                        const nspAnalysis = shell.exec(
-                          `./node_modules/.bin/nsp check ${path.join(
-                            localPath,
-                            'package'
-                          )} --reporter json`,
-                          { silent: true }
-                        ).stdout;
-                        logger.info(nspAnalysis);
-                        if (nspAnalysis) {
-                          package.nsp = JSON.parse(nspAnalysis);
-                        } else {
-                          package.nsp = [];
-                        }
-                        logger.info(`Cleaning up`);
+                        logger.info(`[14] Cleaning up`);
                         rimraf.sync(dest);
                         return npmpackages.getAsync(job.package_name);
                       })
@@ -370,28 +376,31 @@ amqp
                       })
                       .catch(err => {
                         if (err.message === 'missing') {
-                          logger.info('New package added!');
+                          logger.info('[End] New package added (missing)!');
+                          logger.error(err);
                           return npmpackages.insertAsync(package);
                         } else {
-                          logger.info(err);
+                          logger.error(err);
                         }
                       })
                       .catch(err => {
-                        console.log(err);
+                        logger.error(err);
                       });
                   } else {
-                    return Promise.reject('Not able to connect to github');
+                    return Promise.reject(
+                      'Not able to connect to github due to parsed URL'
+                    );
                   }
                 })
                 .catch(err => {
                   console.error(err);
                   if (err.message == 'Not Found') {
                     package.error = 'not-found';
-                    console.log('Not found in github parsed address');
+                    logger.error('Repo not found in github parsed URL');
                   }
                 })
                 .finally(() => {
-                  console.log(' [x] Done');
+                  logger.info('[End] Done and Acknowledgement!');
                   ch.ack(msg);
                 });
             }
@@ -403,7 +412,7 @@ amqp
         logger.error(err);
       })
       .finally(() => {
-        logger.info('done');
+        logger.info('--- Done ---');
       });
     return ok;
   })
