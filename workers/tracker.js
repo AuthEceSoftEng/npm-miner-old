@@ -21,7 +21,7 @@ const last_sequence_id = 'last_sequence';
 const q = 'filter';
 
 new CronJob(
-  '00 38 * * * *',
+  '00 32 * * * *',
   function() {
     let last_seq_doc;
     let last_seq;
