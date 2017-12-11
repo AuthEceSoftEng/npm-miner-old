@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 const { graphqlExpress, graphiqlExpress } = require('graphql-server-express');
 var debug = require('debug')('demo-server:server');
 var http = require('http');
+const schema = require('./schema');
 
 var app = express();
 
@@ -13,11 +14,7 @@ var app = express();
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(
-  '/graphql',
-  bodyParser.json(),
-  graphqlExpress({ schema: myGraphQLSchema })
-);
+app.use('/graphql', bodyParser.json(), graphqlExpress({ schema }));
 app.get('/graphiql', graphiqlExpress({ endpointURL: '/graphql' })); // if you want GraphiQL enabled
 
 // catch 404 and forward to error handler
