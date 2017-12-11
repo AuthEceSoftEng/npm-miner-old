@@ -3,8 +3,6 @@ services:
   front-end:
     build:
       context: ./front-end
-    volumes:
-      - ./front-end:/app/
   nginx:
     image: nginx:alpine
     links:
