@@ -1,12 +1,18 @@
 version: '3'
 services:
-  front-end:
-    build: './front-end'
+  # front-end:
+  #   build: './front-end'
+  #   ports:
+  #    - '4000:3000'
+  nginx:
+    container_name: npmminer_web
+    image: npmminer_web
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    volumes:
+      - ./front-end/public:/usr/share/nginx/html
     ports:
-     - '4000:3000'
-  web:
-    build: './nginx'
-    links:
-     - 'front-end'
-    ports:
-     - '8080:80' 
+      - "80:80"
+      - "443:443"
+
