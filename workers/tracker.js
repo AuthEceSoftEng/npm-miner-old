@@ -5,12 +5,14 @@ const Promise = require('bluebird');
 const consts = require('./consts');
 
 const logger = bunyan.createLogger({ name: 'tracker' });
-const npmdb = require('nano')('http://couchdb.npm-miner.com:5986/npm-registry');
+const npmdb = require('nano')(
+  'https://couchdb.npm-miner.com:6984/npm-registry'
+);
 Promise.promisifyAll(npmdb);
 const url =
   'amqp://localhost' ||
   process.env.CLOUDAMQP_URL ||
-  'amqp://snf-782941.vm.okeanos.grnet.gr';
+  'amqp://snf-779950.vm.okeanos.grnet.gr';
 
 let myConn;
 let channel;

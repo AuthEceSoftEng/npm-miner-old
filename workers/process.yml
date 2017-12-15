@@ -1,5 +1,5 @@
 apps:
-  - script : tracker.js | ./node_modules/.bin/bunyan
-  - script   : filter.js | ./node_modules/.bin/bunyan
-    instances: 1
+  - script : tracker.js
+  - script   : filter.js
+    instances: 3
     exec_mode: cluster

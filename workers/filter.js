@@ -11,10 +11,12 @@ const Promise = require('bluebird');
 const rimraf = require('rimraf');
 const _ = require('lodash');
 const GitHubApi = require('github');
-const npmdb = require('nano')('http://couchdb.npm-miner.com:5986/npm-registry');
+const npmdb = require('nano')(
+  'https://couchdb.npm-miner.com:6984/npm-registry'
+);
 Promise.promisifyAll(npmdb);
 const npmpackages = require('nano')(
-  'http://couchdb.npm-miner.com:5986/npm-packages'
+  'https://couchdb.npm-miner.com:6984/npm-packages'
 );
 Promise.promisifyAll(npmpackages);
 const request = require('request-promise');
@@ -38,7 +40,8 @@ function makeid() {
 //
 // Configuration and Variables
 //
-const pid = process.argv[2];
+//const pid = process.argv[2];
+const pid = makeid();
 const logger = bunyan.createLogger({
   name: 'worker',
   streams: [
@@ -59,7 +62,7 @@ const qin = 'filter';
 const url =
   'amqp://localhost' ||
   process.env.CLOUDAMQP_URL ||
-  'amqp://snf-782941.vm.okeanos.grnet.gr';
+  'amqp://snf-779950.vm.okeanos.grnet.gr';
 const dest = `./downloads${pid}`;
 const github = new GitHubApi({
   version: '3.0.0',

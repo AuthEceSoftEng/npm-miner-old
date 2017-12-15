@@ -59,3 +59,7 @@ database that has filtered and analyzed npm packages.
 
 `replicate.js`: Starts the continuous replication of the npm registry if it does not exist
 `init.js`: The initial databases and views
+
+`docker run -d --name couchdb -p 5984:5984 -v $(pwd):/opt/couchdb/data authecesofteng/couchdb`
+
+`docker run -d --name couchdb-ssl -p 6984:6984 -e COUCHDB_USER=<username> -e COUCHDB_PASSWORD=<password> -v /data/couchdb:/usr/local/var/lib/couchdb klaemo/couchdb-ssl`
