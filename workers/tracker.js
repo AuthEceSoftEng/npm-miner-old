@@ -6,7 +6,7 @@ const consts = require('./consts');
 
 const logger = bunyan.createLogger({ name: 'tracker' });
 const npmdb = require('nano')({
-  url: 'https://couchdb.npm-miner.com:6984/npm-registry',
+  url: 'http://couchdb.npm-miner.com:5984/npm-registry',
   agentOptions: {
     rejectUnauthorized: false
   }

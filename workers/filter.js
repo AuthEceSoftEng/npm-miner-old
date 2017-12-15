@@ -12,14 +12,14 @@ const rimraf = require('rimraf');
 const _ = require('lodash');
 const GitHubApi = require('github');
 const npmdb = require('nano')({
-  url: 'https://couchdb.npm-miner.com:6984/npm-registry',
+  url: 'http://couchdb.npm-miner.com:5984/npm-registry',
   agentOptions: {
     rejectUnauthorized: false
   }
 });
 Promise.promisifyAll(npmdb);
 const npmpackages = require('nano')({
-  url: 'https://couchdb.npm-miner.com:6984/npm-packages',
+  url: 'http://couchdb.npm-miner.com:5984/npm-packages',
   agentOptions: {
     rejectUnauthorized: false
   }
