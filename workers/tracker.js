@@ -5,9 +5,12 @@ const Promise = require('bluebird');
 const consts = require('./consts');
 
 const logger = bunyan.createLogger({ name: 'tracker' });
-const npmdb = require('nano')(
-  'https://couchdb.npm-miner.com:6984/npm-registry'
-);
+const npmdb = require('nano')({
+  url: 'https://couchdb.npm-miner.com:6984/npm-registry',
+  agentOptions: {
+    rejectUnauthorized: false
+  }
+});
 Promise.promisifyAll(npmdb);
 const url =
   'amqp://localhost' ||
@@ -22,7 +25,7 @@ const q = 'filter';
 const _ = require('lodash');
 
 new CronJob(
-  '00 00 * * * *',
+  '00 45 * * * *',
   function() {
     // Get the latest change
     logger.info('It is time to track the changes');

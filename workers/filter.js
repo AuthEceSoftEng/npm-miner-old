@@ -11,13 +11,19 @@ const Promise = require('bluebird');
 const rimraf = require('rimraf');
 const _ = require('lodash');
 const GitHubApi = require('github');
-const npmdb = require('nano')(
-  'https://couchdb.npm-miner.com:6984/npm-registry'
-);
+const npmdb = require('nano')({
+  url: 'https://couchdb.npm-miner.com:6984/npm-registry',
+  agentOptions: {
+    rejectUnauthorized: false
+  }
+});
 Promise.promisifyAll(npmdb);
-const npmpackages = require('nano')(
-  'https://couchdb.npm-miner.com:6984/npm-packages'
-);
+const npmpackages = require('nano')({
+  url: 'https://couchdb.npm-miner.com:6984/npm-packages',
+  agentOptions: {
+    rejectUnauthorized: false
+  }
+});
 Promise.promisifyAll(npmpackages);
 const request = require('request-promise');
 const shell = require('shelljs');
