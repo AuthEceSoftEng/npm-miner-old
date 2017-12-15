@@ -13,7 +13,7 @@ import theme from './theme';
 
 const client = new ApolloClient({
   link: new HttpLink({
-    uri: 'https://api.graph.cool/simple/v1/cj3a6d6i0a2s30130n9d0jy6d'
+    uri: 'http://localhost:3001/graphql'
   }),
   cache: new InMemoryCache()
 });
@@ -47,9 +47,7 @@ class App extends Component {
       .query({
         query: gql`
           {
-            allPackages {
-              name
-            }
+            ping
           }
         `
       })
