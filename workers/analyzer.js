@@ -331,7 +331,7 @@ amqp
                       })
                       .then(paths => {
                         logger.info(`[10] Files identified: ${paths.length}`);
-                        if (path.length <= 1000) {
+                        if (paths.length <= 1000) {
                           logger.info(`[11] Running eslint`);
                           let result = cli.executeOnFiles(paths);
                           package.eslint = {
