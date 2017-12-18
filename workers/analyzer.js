@@ -331,56 +331,64 @@ amqp
                       })
                       .then(paths => {
                         logger.info(`[10] Files identified: ${paths.length}`);
-                        logger.info(`[11] Running eslint`);
-                        let result = cli.executeOnFiles(paths);
-                        package.eslint = {
-                          errorCount: result.errorCount,
-                          warningCount: result.warningCount
-                        };
-                        logger.info(`[12] Running escomplex`);
-                        const source = _.chain(paths)
-                          .map(readCode)
-                          .reject(['code', null])
-                          .value();
-                        let escomplexResult = escomplex.analyse(source, {
-                          ignoreErrors: true
-                        });
-                        let tlocp = _.sumBy(
-                          escomplexResult.reports,
-                          o => o.aggregate.sloc.physical
-                        );
-                        let tlocl = _.sumBy(
-                          escomplexResult.reports,
-                          o => o.aggregate.sloc.logical
-                        );
-                        package.escomplex = {
-                          firstOrderDensity: escomplexResult.firstOrderDensity,
-                          changeCost: escomplexResult.changeCost,
-                          coreSize: escomplexResult.coreSize,
-                          loc: escomplexResult.loc,
-                          cyclomatic: escomplexResult.cyclomatic,
-                          effort: escomplexResult.effort,
-                          params: escomplexResult.params,
-                          maintainability: escomplexResult.maintainability,
-                          tlocp,
-                          tlocl
-                        };
-                        logger.info(`[13] Running nsp`);
-                        const nspAnalysis = shell.exec(
-                          `./node_modules/.bin/nsp check ${path.join(
-                            localPath,
-                            'package'
-                          )} --reporter json`,
-                          { silent: true }
-                        ).stdout;
-                        if (nspAnalysis) {
-                          package.nsp = JSON.parse(nspAnalysis).length;
+                        if (path.length <= 1000) {
+                          logger.info(`[11] Running eslint`);
+                          let result = cli.executeOnFiles(paths);
+                          package.eslint = {
+                            errorCount: result.errorCount,
+                            warningCount: result.warningCount
+                          };
+                          logger.info(`[12] Running escomplex`);
+                          const source = _.chain(paths)
+                            .map(readCode)
+                            .reject(['code', null])
+                            .value();
+                          let escomplexResult = escomplex.analyse(source, {
+                            ignoreErrors: true
+                          });
+                          let tlocp = _.sumBy(
+                            escomplexResult.reports,
+                            o => o.aggregate.sloc.physical
+                          );
+                          let tlocl = _.sumBy(
+                            escomplexResult.reports,
+                            o => o.aggregate.sloc.logical
+                          );
+                          package.escomplex = {
+                            firstOrderDensity:
+                              escomplexResult.firstOrderDensity,
+                            changeCost: escomplexResult.changeCost,
+                            coreSize: escomplexResult.coreSize,
+                            loc: escomplexResult.loc,
+                            cyclomatic: escomplexResult.cyclomatic,
+                            effort: escomplexResult.effort,
+                            params: escomplexResult.params,
+                            maintainability: escomplexResult.maintainability,
+                            tlocp,
+                            tlocl
+                          };
+                          logger.info(`[13] Running nsp`);
+                          const nspAnalysis = shell.exec(
+                            `./node_modules/.bin/nsp check ${path.join(
+                              localPath,
+                              'package'
+                            )} --reporter json`,
+                            { silent: true }
+                          ).stdout;
+                          if (nspAnalysis) {
+                            package.nsp = JSON.parse(nspAnalysis).length;
+                          } else {
+                            package.nsp = 0;
+                          }
+                          logger.info(`[14] Cleaning up`);
+                          rimraf.sync(dest);
+                          return npmpackages.getAsync(job.package_name);
                         } else {
-                          package.nsp = 0;
+                          rimraf.sync(dest);
+                          return Promise.reject(
+                            'Too many files (more than 1000)'
+                          );
                         }
-                        logger.info(`[14] Cleaning up`);
-                        rimraf.sync(dest);
-                        return npmpackages.getAsync(job.package_name);
                       })
                       .then(res => {
                         package._rev = res._rev;
