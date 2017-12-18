@@ -46,8 +46,8 @@ function makeid() {
 //
 // Configuration and Variables
 //
-//const pid = process.argv[2];
-const pid = makeid();
+const pid = process.argv[2];
+//const pid = makeid();
 const logger = bunyan.createLogger({
   name: 'worker',
   streams: [
@@ -64,6 +64,9 @@ const logger = bunyan.createLogger({
     }
   ]
 });
+
+loggerWarn = logger.warn.bind(logger);
+
 const qin = 'filter';
 const url =
   'amqp://localhost' ||
@@ -425,4 +428,4 @@ amqp
       });
     return ok;
   })
-  .then(null, logger.warn);
+  .then(null, loggerWarn);

@@ -16,6 +16,7 @@
     "cron": "^1.3.0",
     "escomplex": "^2.0.0-alpha",
     "eslint": "^4.11.0",
+    "forever": "^0.15.3",
     "fs": "0.0.1-security",
     "github": "^12.0.1",
     "globby": "^7.1.1",

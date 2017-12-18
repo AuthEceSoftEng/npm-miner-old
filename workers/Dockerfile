@@ -8,5 +8,6 @@ WORKDIR /workers
 ADD . /workers
 
 RUN npm install
-
-CMD ["node", "npm-github-mapper.js"]
+RUN npm install -g pm2
+ENV COUCHDB_URL=http://couchdb.npm-miner.com:5984/
+CMD ["pm2-docker", "process.yml"]
