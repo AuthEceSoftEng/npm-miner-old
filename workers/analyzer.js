@@ -69,8 +69,8 @@ loggerWarn = logger.warn.bind(logger);
 
 const qin = 'filter';
 const url =
-  'amqp://localhost' ||
-  process.env.CLOUDAMQP_URL ||
+  // 'amqp://localhost' ||
+  // process.env.CLOUDAMQP_URL ||
   'amqp://snf-779950.vm.okeanos.grnet.gr';
 const dest = `./downloads${pid}`;
 const github = new GitHubApi({
@@ -251,7 +251,7 @@ amqp
                             repo: repo
                           });
                         } else {
-                          package.error = 'Missmatch betwwen npm and github';
+                          package.error = 'Missmatch between npm and github';
                           return Promise.reject(
                             new Error({
                               message: 'missmatch',
@@ -332,6 +332,13 @@ amqp
                       .then(paths => {
                         logger.info(`[10] Files identified: ${paths.length}`);
                         if (paths.length <= 1000) {
+                          package.numOfFiles = paths.length;
+                          const directories = _.map(paths, path => {
+                            return path.split('/').length - 4;
+                          });
+                          package.minDirDepth = _.min(directories);
+                          package.maxDirDepth = _.max(directories);
+                          package.sumDirDepth = _.sum(directories);
                           logger.info(`[11] Running eslint`);
                           let result = cli.executeOnFiles(paths);
                           package.eslint = {
@@ -392,11 +399,12 @@ amqp
                       })
                       .then(res => {
                         package._rev = res._rev;
+                        logger.info('[End] New package added (updated)!');
                         return npmpackages.insertAsync(package);
                       })
                       .catch(err => {
                         if (err.message === 'missing') {
-                          logger.info('[End] New package added (missing)!');
+                          logger.info('[End] New package added (created)!');
                           logger.error(err);
                           return npmpackages.insertAsync(package);
                         } else {
