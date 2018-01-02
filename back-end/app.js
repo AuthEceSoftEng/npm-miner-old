@@ -6,36 +6,25 @@ const { graphqlExpress, graphiqlExpress } = require('apollo-server-express');
 const { makeExecutableSchema } = require('graphql-tools');
 const debug = require('debug')('demo-server:server');
 const http = require('http');
-// const schema = require('./schema');
 
-// Some fake data
-const books = [
-  {
-    title: "Harry Potter and the Sorcerer's stone",
-    author: 'J.K. Rowling'
-  },
-  {
-    title: 'Jurassic Park',
-    author: 'Michael Crichton'
-  }
-];
+const npmSearch = require('./data-sources/npm-search');
 
 // The GraphQL schema in string form
 const typeDefs = `
   type Query {
-    books: [Book]
-    book(id: Int!): Book
+    npmPackages(name: String!): [NpmPackage]
   }
-  type Book { title: String, author: String }
+  type NpmPackage {
+    name: String
+    description: String
+   }
 `;
 
 // The resolvers
 const resolvers = {
   Query: {
-    books: () => books,
-    book: (parObj, args) => {
-      console.log(parObj, args);
-      return books[0];
+    npmPackages: (_, { name }) => {
+      return npmSearch(name);
     }
   }
 };
