@@ -1,25 +1,67 @@
-var express = require('express');
-var path = require('path');
-var logger = require('morgan');
-var bodyParser = require('body-parser');
-const { graphqlExpress, graphiqlExpress } = require('graphql-server-express');
-var debug = require('debug')('demo-server:server');
-var http = require('http');
-const schema = require('./schema');
+const express = require('express');
+const path = require('path');
+const logger = require('morgan');
+const bodyParser = require('body-parser');
+const { graphqlExpress, graphiqlExpress } = require('apollo-server-express');
+const { makeExecutableSchema } = require('graphql-tools');
+const debug = require('debug')('demo-server:server');
+const http = require('http');
+// const schema = require('./schema');
 
-var app = express();
+// Some fake data
+const books = [
+  {
+    title: "Harry Potter and the Sorcerer's stone",
+    author: 'J.K. Rowling'
+  },
+  {
+    title: 'Jurassic Park',
+    author: 'Michael Crichton'
+  }
+];
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+// The GraphQL schema in string form
+const typeDefs = `
+  type Query {
+    books: [Book]
+    book(id: Int!): Book
+  }
+  type Book { title: String, author: String }
+`;
+
+// The resolvers
+const resolvers = {
+  Query: {
+    books: () => books,
+    book: (parObj, args) => {
+      console.log(parObj, args);
+      return books[0];
+    }
+  }
+};
+
+// Put together a schema
+const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers
+});
+
+// Initialize the app
+const app = express();
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// The GraphQL endpoint
 app.use('/graphql', bodyParser.json(), graphqlExpress({ schema }));
-app.get('/graphiql', graphiqlExpress({ endpointURL: '/graphql' })); // if you want GraphiQL enabled
+
+// GraphiQL, a visual editor for queries
+app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
+  const err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
@@ -39,20 +81,22 @@ app.use(function(err, req, res, next) {
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+const server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
+server.listen(port, () => {
+  console.log('Go to http://localhost:3000/graphiql to run queries!');
+});
 server.on('error', onError);
 server.on('listening', onListening);
 
@@ -61,7 +105,7 @@ server.on('listening', onListening);
  */
 
 function normalizePort(val) {
-  var port = parseInt(val, 10);
+  const port = parseInt(val, 10);
 
   if (isNaN(port)) {
     // named pipe
@@ -85,7 +129,7 @@ function onError(error) {
     throw error;
   }
 
-  var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
+  const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -107,7 +151,7 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
+  const addr = server.address();
+  const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
