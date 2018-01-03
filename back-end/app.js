@@ -3,37 +3,11 @@ const path = require('path');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
 const { graphqlExpress, graphiqlExpress } = require('apollo-server-express');
-const { makeExecutableSchema } = require('graphql-tools');
 const debug = require('debug')('demo-server:server');
 const http = require('http');
-
-const npmSearch = require('./data-sources/npm-search');
-
-// The GraphQL schema in string form
-const typeDefs = `
-  type Query {
-    npmPackages(name: String!): [NpmPackage]
-  }
-  type NpmPackage {
-    name: String
-    description: String
-   }
-`;
-
-// The resolvers
-const resolvers = {
-  Query: {
-    npmPackages: (_, { name }) => {
-      return npmSearch(name);
-    }
-  }
-};
+const schema = require('./schema');
 
 // Put together a schema
-const schema = makeExecutableSchema({
-  typeDefs,
-  resolvers
-});
 
 // Initialize the app
 const app = express();
