@@ -24,13 +24,7 @@ const resolvers = {
 };
 
 const schema = makeExecutableSchema({
-  typeDefs: [
-    SchemaDefinition,
-    Query,
-    // we have to destructure array imported from the post.js file
-    // as typeDefs only accepts an array of strings or functions
-    NpmPackage
-  ],
+  typeDefs: [SchemaDefinition, Query, NpmPackage],
   resolvers
 });
 
