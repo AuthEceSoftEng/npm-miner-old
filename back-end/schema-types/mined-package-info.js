@@ -3,6 +3,7 @@ const MinedPackageInfo = `type MinedPackageInfo {
     name: String!
     github_repository: String
     stars: Int
+    escomplex : JSON
    }`;
 
 module.exports = () => [MinedPackageInfo];

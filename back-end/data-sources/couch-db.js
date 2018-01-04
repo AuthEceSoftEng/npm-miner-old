@@ -11,12 +11,12 @@ const getMinedPackage = httpGet(BASE_URL, 'npm-packages/');
 
 const createGraphqlResponse = couchDBResponse => {
   return couchDBResponse.then(res => {
-    console.log(res.data._id);
     return {
       _id: res.data._id,
       name: res.data.name,
       github_repository: res.data.github_repository,
-      stars: res.data.stars
+      stars: res.data.stars,
+      testJSON: res.data.escomplex
     };
   });
 };
