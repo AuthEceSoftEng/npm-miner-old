@@ -1,53 +1,37 @@
-.container > div {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2em;
-    color: #ffeead;
-  }
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
 
   html, body {
     box-sizing: border-box;
     height: 100%;
-    padding: 10px;
-    background-color: #96ceb4;
+    padding: 0px;
     margin: 0px;
+    font-family: 'Source Sans Pro', Arial, sans-serif;
+    font-size: 16px;
   }
 
-  .container > div:nth-child(1n) {
-    background-color: #96ceb4;
+  .container > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
-  .container > div:nth-child(3n) {
-    background-color: #88d8b0;
-  }
 
-  .container > div:nth-child(2n) {
-    background-color: #ff6f69;
-  }
-
-  .container > div:nth-child(4n) {
-    background-color: #ffcc5c;
-  }
 
   .container {
     height: 100%;
     display: grid;
-    grid-gap: 3px;
+    grid-gap: 0px;
     grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: 40px auto 40px;
+    grid-template-rows: 64px auto 64px;
     grid-template-areas:
-        ". h h h h h h h h h h ."
-        "m c c c c c c c c c c c"
-        ". f f f f f f f f f f .";
+        "h h h h h h h h h h h h"
+        "c c c c c c c c c c c c"
+        "f f f f f f f f f f f f";
   }
 
   .header {
     grid-area: h;
-  }
-
-  .menu {
-    grid-area: m;
+    background: linear-gradient(312deg, #14134e 0%, #512d5a 68%, #843b61 100%);
   }
 
   .content {
@@ -55,5 +39,9 @@
   }
 
   .footer {
+    z-index: -1;
     grid-area: f;
+    background-color: #222326;
+    color: white;
+    font-size: 0.8em;
   }
