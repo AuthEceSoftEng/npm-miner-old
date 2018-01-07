@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import Header from './scenes/Header/Header';
-import Footer from './scenes/Footer/Footer';
-import Content from './scenes/Content/Content';
-import styled, { ThemeProvider } from 'styled-components';
+
+// import Header from './scenes/Header/Header';
+// import Footer from './scenes/Footer/Footer';
+// import Content from './scenes/Content/Content';
+
+import styles from './app.module.css';
+// import mainGrid from './main-grid.module.css';
+
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 import { InMemoryCache } from 'apollo-cache-inmemory';
@@ -11,23 +15,13 @@ import { ApolloProvider } from 'react-apollo';
 import gql from 'graphql-tag';
 import theme from './theme';
 
+console.log(styles);
 const client = new ApolloClient({
   link: new HttpLink({
     uri: 'http://localhost:3001/graphql'
   }),
   cache: new InMemoryCache()
 });
-
-const Main = styled.div`
-  text-align: center;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  align-content: center;
-  justify-content: space-between;
-  font-family: 'Oxygen', sans-serif;
-`;
 
 class App extends Component {
   constructor() {
@@ -42,7 +36,6 @@ class App extends Component {
   };
 
   componentWillMount() {
-    console.log('Test');
     client
       .query({
         query: gql`
@@ -60,22 +53,37 @@ class App extends Component {
     return (
       <Router>
         <ApolloProvider client={client}>
-          <ThemeProvider theme={this.state.theme}>
-            <div>
-              <Main>
-                <Header />
-                <Content
-                  setAnalyzedPackage={this.setAnalyzedPackage}
-                  analyzedPackage={this.state.analyzedPackage}
-                />
-                <Footer />
-              </Main>
-            </div>
-          </ThemeProvider>
+          <div className={styles.container}>
+            <div className={styles.header}>HEADER</div>
+            <div className={styles.menu}>MENU</div>
+            <div className={styles.content}>CONTENT</div>
+            <div className={styles.footer}>FOOTER</div>
+          </div>
         </ApolloProvider>
       </Router>
     );
   }
+
+  // render() {
+  //   return (
+  //     <Router>
+  //       <ApolloProvider client={client}>
+  //         <ThemeProvider theme={this.state.theme}>
+  //           <div>
+  //             <Main>
+  //               <Header />
+  //               <Content
+  //                 setAnalyzedPackage={this.setAnalyzedPackage}
+  //                 analyzedPackage={this.state.analyzedPackage}
+  //               />
+  //               <Footer />
+  //             </Main>
+  //           </div>
+  //         </ThemeProvider>
+  //       </ApolloProvider>
+  //     </Router>
+  //   );
+  // }
 }
 
 export default App;
