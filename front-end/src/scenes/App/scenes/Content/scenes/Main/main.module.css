@@ -12,17 +12,14 @@
   grid-template-rows: 100px 200px repeat(3, 1fr);
 
   grid-template-areas: '. . . . i i i i . . . .' '. . . s s s s s s . . .'
-    '. . t t t t t t t t . .' '. . t t t t t t t t . .'
-    '. . t t t t t t t t . .';
+    '. . . t t t t t t . . .' '. . . t t t t t t . . .'
+    '. . . t t t t t t . . .';
 }
 
 .intro {
   grid-area: i;
   font-weight: 800;
   text-align: center;
-  border-width: 4px;
-  border-style: solid;
-  border-color: lightslategrey;
 }
 
 .search {
@@ -45,7 +42,7 @@
 
 ul {
   list-style: none;
-  padding: 0;
+  padding: 5px;
   margin: auto 0;
   margin: 15px;
 }
@@ -55,10 +52,11 @@ li {
   text-align: start;
   color: white;
   list-style: none;
+  border-bottom: 1px solid white;
 }
 
 ul:last-child {
-    margin-bottom: 50px;
+    padding-bottom: 30px;
   }
 
 input {
@@ -77,8 +75,23 @@ input {
 
 .statistics {
   grid-area: t;
-  border-width: 4px;
-  border-style: solid;
-  border-color: lightslategrey;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  flex-direction: row;
   z-index: -1;
+}
+
+.statisticsBox {
+  box-shadow: 0 0 3pt 2pt #512d5a;
+  margin: 15px;
+  padding: 15px;
+  border-radius: 8px;
+
+}
+
+.statisticsBox > h2 {
+  margin: 15px;
+  border-bottom: 2px solid #14134e;
+
 }

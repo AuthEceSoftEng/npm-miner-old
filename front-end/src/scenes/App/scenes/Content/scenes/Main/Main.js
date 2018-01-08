@@ -2,24 +2,60 @@ import React, { Component } from 'react';
 import styles from './main.module.css';
 
 class Main extends Component {
+  state = {
+    foundPackages: [],
+    searchBoxFocued: false
+  };
   placeholder = 'Search for a package';
-  foundPackages = [];
+
   foundPackages2 = [
-    'express',
-    'react',
-    'angular',
-    'graphql',
-    'apollo',
-    'bootstrap',
-    'next'
+    { name: 'express', description: 'Lorem Ipsum' },
+    { name: 'react', description: 'Lorem Ipsum' },
+    { name: 'angular', description: 'Lorem Ipsum' },
+    { name: 'graphql', description: 'Lorem Ipsum' },
+    { name: 'apollo', description: 'Lorem Ipsum' },
+    { name: 'bootstrap', description: 'Lorem Ipsum' },
+    { name: 'next', description: 'Lorem Ipsum' }
   ];
   name = '';
   handleChange = event => {
-    if (event.target.value) {
-      this.foundPackages.concat('fdf');
+    console.log(event);
+
+    if (event.target.value !== '') {
+      this.setState(state => {
+        return {
+          ...state,
+          foundPackages: this.foundPackages2
+        };
+      });
+    } else {
+      this.setState(state => {
+        return {
+          ...state,
+          foundPackages: []
+        };
+      });
     }
 
     console.log(event.target.value);
+  };
+
+  handleFocus = event => {
+    this.setState(state => {
+      return {
+        ...state,
+        searchBoxFocued: true
+      };
+    });
+  };
+
+  handleBlur = event => {
+    this.setState(state => {
+      return {
+        ...state,
+        searchBoxFocued: false
+      };
+    });
   };
 
   render() {
@@ -39,17 +75,48 @@ class Main extends Component {
               name="searchTerm"
               placeholder={this.placeholder}
               onChange={e => this.handleChange(e)}
+              onFocus={e => this.handleFocus(e)}
+              onBlur={e => this.handleBlur(e)}
             />
-            <div className={styles.searchResults}>
-              <ul>{this.foundPackages.map(pack => <li>{pack}</li>)}</ul>
-            </div>
+            {this.state.searchBoxFocued &&
+            this.state.foundPackages.length > 0 ? (
+              <div className={styles.searchResults}>
+                <ul>
+                  {this.state.foundPackages.map(pack => (
+                    <li>
+                      <h3>{pack.name}</h3>
+                      <p>{pack.description}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div />
+            )}
           </div>
         </div>
         <div className={styles.statistics}>
-          <h2>Test</h2>
-          <h2>Main</h2>
-          <h2>Main</h2>
-          <h2>Main</h2>
+          <div className={styles.statisticsBox}>
+            <h2>Test</h2>
+            <div>lines : 30</div>
+            <div>lines : 30</div>
+            <div>lines : 30</div>
+            <div>lines : 30</div>
+          </div>
+          <div className={styles.statisticsBox}>
+            <h2>Test</h2>
+            <div>lines : 30</div>
+            <div>lines : 30</div>
+            <div>lines : 30</div>
+            <div>lines : 30</div>
+          </div>
+          <div className={styles.statisticsBox}>
+            <h2>Test</h2>
+            <div>lines : 30</div>
+            <div>lines : 30</div>
+            <div>lines : 30</div>
+            <div>lines : 30</div>
+          </div>
         </div>
       </div>
     );
