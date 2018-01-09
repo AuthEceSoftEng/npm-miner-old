@@ -1,4 +1,6 @@
 const express = require('express');
+var cors = require('cors');
+
 const path = require('path');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
@@ -15,6 +17,8 @@ const app = express();
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use(cors());
 
 // The GraphQL endpoint
 app.use('/graphql', bodyParser.json(), graphqlExpress({ schema }));

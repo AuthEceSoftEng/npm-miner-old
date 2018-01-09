@@ -11,30 +11,15 @@ import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloProvider } from 'react-apollo';
-import gql from 'graphql-tag';
 
 const client = new ApolloClient({
   link: new HttpLink({
-    uri: 'http://localhost:3001/graphql'
+    uri: 'http://localhost:3000/graphql'
   }),
   cache: new InMemoryCache()
 });
 
 class App extends Component {
-  componentWillMount() {
-    client
-      .query({
-        query: gql`
-          {
-            ping
-          }
-        `
-      })
-      .then(res => {
-        console.log(res.data);
-      });
-  }
-
   render() {
     return (
       <Router>

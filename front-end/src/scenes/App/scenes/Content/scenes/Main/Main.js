@@ -1,5 +1,18 @@
 import React, { Component } from 'react';
 import styles from './main.module.css';
+import { RingLoader } from 'halogenium';
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
+
+const frontPageQuery = gql`
+  {
+    frontPageStats {
+      loc
+      numOfPackages
+      topTenStars
+    }
+  }
+`;
 
 class Main extends Component {
   state = {
@@ -14,7 +27,6 @@ class Main extends Component {
     { name: 'angular', description: 'Lorem Ipsum' },
     { name: 'graphql', description: 'Lorem Ipsum' },
     { name: 'apollo', description: 'Lorem Ipsum' },
-    { name: 'bootstrap', description: 'Lorem Ipsum' },
     { name: 'next', description: 'Lorem Ipsum' }
   ];
   name = '';
@@ -59,6 +71,7 @@ class Main extends Component {
   };
 
   render() {
+    console.log(this.props.data);
     return (
       <div className={styles.container}>
         <div className={styles.intro}>
@@ -97,25 +110,23 @@ class Main extends Component {
         </div>
         <div className={styles.statistics}>
           <div className={styles.statisticsBox}>
-            <h2>Test</h2>
-            <div>lines : 30</div>
-            <div>lines : 30</div>
-            <div>lines : 30</div>
-            <div>lines : 30</div>
-          </div>
-          <div className={styles.statisticsBox}>
-            <h2>Test</h2>
-            <div>lines : 30</div>
-            <div>lines : 30</div>
-            <div>lines : 30</div>
-            <div>lines : 30</div>
-          </div>
-          <div className={styles.statisticsBox}>
-            <h2>Test</h2>
-            <div>lines : 30</div>
-            <div>lines : 30</div>
-            <div>lines : 30</div>
-            <div>lines : 30</div>
+            <h2>Top 10 Packages</h2>
+            {!this.props.data.loading ? (
+              <table>
+                <tbody>
+                  {this.props.data.frontPageStats.topTenStars.map(v => {
+                    return (
+                      <tr className={styles.topTenStars} key={v.id}>
+                        <td>{v.value}</td>
+                        <td>{v.key} stars</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            ) : (
+              <RingLoader color="#512d5a" size="32px" margin="4px" />
+            )}
           </div>
         </div>
       </div>
@@ -123,4 +134,6 @@ class Main extends Component {
   }
 }
 
-export default Main;
+const MainWithData = graphql(frontPageQuery)(Main);
+
+export default MainWithData;
