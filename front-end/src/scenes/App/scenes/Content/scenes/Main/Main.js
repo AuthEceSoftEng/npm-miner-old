@@ -4,6 +4,9 @@ import { RingLoader } from 'halogenium';
 import { graphql } from 'react-apollo';
 import gql from 'graphql-tag';
 
+import take from 'ramda/src/take';
+import { SearchService } from '../../../../../../services/searchService';
+
 const frontPageQuery = gql`
   {
     frontPageStats {
@@ -19,37 +22,22 @@ class Main extends Component {
     foundPackages: [],
     searchBoxFocued: false
   };
+  searchService = new SearchService();
   placeholder = 'Search for a package';
+  searchResults$ = this.searchService.getResults();
 
-  foundPackages2 = [
-    { name: 'express', description: 'Lorem Ipsum' },
-    { name: 'react', description: 'Lorem Ipsum' },
-    { name: 'angular', description: 'Lorem Ipsum' },
-    { name: 'graphql', description: 'Lorem Ipsum' },
-    { name: 'apollo', description: 'Lorem Ipsum' },
-    { name: 'next', description: 'Lorem Ipsum' }
-  ];
-  name = '';
+  componentDidMount() {
+    this.searchResults$.subscribe(data => {
+      this.setFoundPackages(data);
+    });
+  }
+
+  componentWillUnmount() {
+    this.searchResults$.unsubscribe();
+  }
+
   handleChange = event => {
-    console.log(event);
-
-    if (event.target.value !== '') {
-      this.setState(state => {
-        return {
-          ...state,
-          foundPackages: this.foundPackages2
-        };
-      });
-    } else {
-      this.setState(state => {
-        return {
-          ...state,
-          foundPackages: []
-        };
-      });
-    }
-
-    console.log(event.target.value);
+    this.searchService.search({ value: event.target.value.trim() });
   };
 
   handleFocus = event => {
@@ -70,8 +58,16 @@ class Main extends Component {
     });
   };
 
+  setFoundPackages = data => {
+    this.setState(state => {
+      return {
+        ...state,
+        foundPackages: take(5, data)
+      };
+    });
+  };
+
   render() {
-    console.log(this.props.data);
     return (
       <div className={styles.container}>
         <div className={styles.intro}>
@@ -85,7 +81,6 @@ class Main extends Component {
           <div>
             <input
               type="text"
-              name="searchTerm"
               placeholder={this.placeholder}
               onChange={e => this.handleChange(e)}
               onFocus={e => this.handleFocus(e)}
@@ -96,7 +91,7 @@ class Main extends Component {
               <div className={styles.searchResults}>
                 <ul>
                   {this.state.foundPackages.map(pack => (
-                    <li>
+                    <li key={pack.name}>
                       <h3>{pack.name}</h3>
                       <p>{pack.description}</p>
                     </li>
