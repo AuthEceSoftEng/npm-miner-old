@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import SearchResults from './SearchResults';
 import styles from './main.module.css';
-import { RingLoader } from 'halogenium';
 
 import take from 'ramda/src/take';
 import { SearchService } from '../../../../../../services/searchService';
