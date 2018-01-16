@@ -69,7 +69,7 @@ loggerWarn = logger.warn.bind(logger);
 
 const qin = 'filter';
 const url =
-  // 'amqp://localhost' ||
+  'amqp://localhost' ||
   // process.env.CLOUDAMQP_URL ||
   'amqp://snf-779950.vm.okeanos.grnet.gr';
 const dest = `./downloads${pid}`;
@@ -246,20 +246,13 @@ amqp
                           `[5] The package name in json is: ${json.name}`
                         );
                         if (json.name === package.name) {
-                          return github.repos.get({
-                            owner: user,
-                            repo: repo
-                          });
                         } else {
-                          package.error = 'Missmatch between npm and github';
-                          return Promise.reject(
-                            new Error({
-                              message: 'missmatch',
-                              detail:
-                                'Name in npm and name in repo is a missmatch or json cannot be parsed'
-                            })
-                          );
+                          package.error = 'name-missmatch';
                         }
+                        return github.repos.get({
+                          owner: user,
+                          repo: repo
+                        });
                       })
                       .then(res => {
                         logger.info(
@@ -275,13 +268,10 @@ amqp
                             `[7] Store package ${package.name} with ${res.data
                               .stargazers_count} GitHub stars!`
                           );
-                          return Promise.resolve('Starting the analysis');
                         } else {
-                          package.error = 'Redirect';
-                          return Promise.reject(
-                            new Error({ message: 'Redirect' })
-                          );
+                          package.error = 'redirect';
                         }
+                        return Promise.resolve('Starting the analysis');
                       })
                       .then(() => {
                         mkdirp.sync(dest);
