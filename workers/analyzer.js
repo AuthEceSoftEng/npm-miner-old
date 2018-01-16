@@ -12,7 +12,7 @@ const rimraf = require('rimraf');
 const _ = require('lodash');
 const GitHubApi = require('github');
 const npmdb = require('nano')({
-  url: 'http://couchdb.npm-miner.com:5984/npm-registry',
+  url: 'http://couchdb.npm-miner.com:5984/npm-registry-2',
   agentOptions: {
     rejectUnauthorized: false
   }
@@ -289,6 +289,7 @@ amqp
                           request(url)
                             .pipe(fs.createWriteStream(tarzball))
                             .on('error', function(err) {
+                              console.log('error 1');
                               console.log(err);
                               reject(callback());
                             })
@@ -304,7 +305,7 @@ amqp
                                 function(err) {
                                   if (err) {
                                     console.log(err);
-                                    return reject('error');
+                                    return reject('error 2');
                                   } else {
                                     console.log('Done!');
                                     return resolve('Job done!');
@@ -399,10 +400,12 @@ amqp
                           logger.error(err);
                           return npmpackages.insertAsync(package);
                         } else {
+                          logger.info('Bucket error 1');
                           logger.error(err);
                         }
                       })
                       .catch(err => {
+                        logger.info('Bucket error 2');
                         logger.error(err);
                       });
                   } else {
