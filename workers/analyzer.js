@@ -69,7 +69,7 @@ loggerWarn = logger.warn.bind(logger);
 
 const qin = 'filter';
 const url =
-  'amqp://localhost' ||
+  // 'amqp://localhost' ||
   // process.env.CLOUDAMQP_URL ||
   'amqp://snf-779950.vm.okeanos.grnet.gr';
 const dest = `./downloads${pid}`;
@@ -216,6 +216,7 @@ amqp
                   ) {
                     package._id = doc.name;
                     package.name = doc.name;
+                    package.date = Date.now;
                     const github_repository = doc.repository.url.match(
                       /https:[\/][\/]github[\.]com[\/][a-zA-Z0-9\-]+[\/][a-zA-Z0-9\-]+/g
                     )[0];
