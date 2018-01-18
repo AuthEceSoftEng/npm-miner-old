@@ -250,6 +250,14 @@ amqp
                         } else {
                           package.error = 'name-missmatch';
                         }
+                        return request({
+                          url: `https://api.npms.io/v2/package/${package.name}`,
+                          json: true
+                        });
+                      })
+                      .then(json => {
+                        logger.info(`[6] The score is  ${json.score.final}`);
+                        package.npmsio = json;
                         return github.repos.get({
                           owner: user,
                           repo: repo
