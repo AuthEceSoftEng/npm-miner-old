@@ -8,7 +8,8 @@ import { SearchService } from '../../../../../../services/searchService';
 class Search extends Component {
   state = {
     foundPackages: [],
-    searchBoxFocued: false
+    searchBoxFocued: false,
+    mouseOverResults: false
   };
   searchService = new SearchService();
   placeholder = 'Search for a package';
@@ -46,6 +47,36 @@ class Search extends Component {
     });
   };
 
+  shouldResultsRender = ({
+    foundPackages,
+    searchBoxFocued,
+    mouseOverResults
+  }) => {
+    if (foundPackages.length === 0) {
+      return false;
+    } else {
+      if (searchBoxFocued) {
+        return true;
+      } else {
+        if (mouseOverResults) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+  };
+
+  handleMouseInResults = mouseOverUL => {
+    console.log(mouseOverUL);
+    this.setState(state => {
+      return {
+        ...state,
+        mouseOverResults: mouseOverUL
+      };
+    });
+  };
+
   setFoundPackages = data => {
     this.setState(state => {
       return {
@@ -66,8 +97,11 @@ class Search extends Component {
             onFocus={e => this.handleFocus(e)}
             onBlur={e => this.handleBlur(e)}
           />
-          {this.state.searchBoxFocued && this.state.foundPackages.length > 0 ? (
-            <SearchResults foundPackages={this.state.foundPackages} />
+          {this.shouldResultsRender(this.state) ? (
+            <SearchResults
+              foundPackages={this.state.foundPackages}
+              checkMouseInResults={this.handleMouseInResults}
+            />
           ) : (
             <div />
           )}

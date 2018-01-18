@@ -14,7 +14,7 @@ import { ApolloProvider } from 'react-apollo';
 
 const client = new ApolloClient({
   link: new HttpLink({
-    uri: 'http://localhost:3000/graphql'
+    uri: process.env.REACT_APP_GRAPHQL_SERVER_ADRESS
   }),
   cache: new InMemoryCache()
 });
@@ -39,27 +39,6 @@ class App extends Component {
       </Router>
     );
   }
-
-  // render() {
-  //   return (
-  //     <Router>
-  //       <ApolloProvider client={client}>
-  //         <ThemeProvider theme={this.state.theme}>
-  //           <div>
-  //             <Main>
-  //               <Header />
-  //               <Content
-  //                 setAnalyzedPackage={this.setAnalyzedPackage}
-  //                 analyzedPackage={this.state.analyzedPackage}
-  //               />
-  //               <Footer />
-  //             </Main>
-  //           </div>
-  //         </ThemeProvider>
-  //       </ApolloProvider>
-  //     </Router>
-  //   );
-  // }
 }
 
 export default App;

@@ -55,6 +55,12 @@ li {
   border-bottom: 1px solid white;
 }
 
+li:hover {
+  background: linear-gradient(45deg, #282699 0%, #66077e 68%, #843b61 100%);
+  /* border: 1px solid white; */
+  border-radius: 10px;
+}
+
 ul:last-child {
     padding-bottom: 30px;
   }
@@ -97,4 +103,14 @@ input {
 .statisticsBox > h2 {
   margin: 15px;
   border-bottom: 2px solid #14134e;
+}
+/*
+div > a, div > a:hover, div > a:focus {
+  color: aliceblue;
+  text-decoration: none;
+} */
+
+.plainText {
+  color: aliceblue;
+  text-decoration: none;
 }
