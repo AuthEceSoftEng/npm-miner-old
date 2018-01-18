@@ -216,7 +216,7 @@ amqp
                   ) {
                     package._id = doc.name;
                     package.name = doc.name;
-                    package.date = Date.now;
+                    package.date = Date.now();
                     const github_repository = doc.repository.url.match(
                       /https:[\/][\/]github[\.]com[\/][a-zA-Z0-9\-]+[\/][a-zA-Z0-9\-]+/g
                     )[0];
