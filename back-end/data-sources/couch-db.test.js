@@ -1,4 +1,4 @@
-const getMinedPackage = require('./couch-db');
+const getMinedPackage = require('./http-sources');
 const axios = require('axios');
 
 describe('talk to couchDB', () => {

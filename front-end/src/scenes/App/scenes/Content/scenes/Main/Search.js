@@ -52,19 +52,7 @@ class Search extends Component {
     searchBoxFocued,
     mouseOverResults
   }) => {
-    if (foundPackages.length === 0) {
-      return false;
-    } else {
-      if (searchBoxFocued) {
-        return true;
-      } else {
-        if (mouseOverResults) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    }
+    return foundPackages.length !== 0 && (searchBoxFocued || mouseOverResults);
   };
 
   handleMouseInResults = mouseOverUL => {

@@ -1,18 +1,29 @@
 const npmSearch = require('./data-sources/npm-search');
-const { getCouchDbData } = require('./data-sources/couch-db');
+const {
+  getCouchDbData,
+  getNpmIOData,
+  getGitHubData
+} = require('./data-sources/http-sources');
 
 const NpmPackage = require('./schema-types/npm-package');
 const MinedPackageInfo = require('./schema-types/mined-package-info');
+const NpmIOPackage = require('./schema-types/npmio-package');
+const GitHubRepo = require('./schema-types/github-schema');
 const FrontPageStats = require('./schema-types/front-page-schema');
 
-const { makeExecutableSchema } = require('graphql-tools');
+const {
+  addResolveFunctionsToSchema,
+  makeExecutableSchema
+} = require('graphql-tools');
 const GraphQLToolsTypes = require('graphql-tools-types');
 
 const Query = `
   type Query {
     npmPackages(name: String!): [NpmPackage]
-    minedPackageInfo(name: String!, a: JSON): MinedPackageInfo
+    minedPackageInfo(name: String!): MinedPackageInfo
     frontPageStats : FrontPageStats
+    npmsIoPackage(name: String!): NpmIOPackage
+    gitHubRepo(owner: String, repo: String):  GitHubRepo
   }
 `;
 
@@ -27,19 +38,17 @@ const SchemaDefinition = `
 const resolvers = {
   JSON: GraphQLToolsTypes.JSON({ name: 'MyJSON' }),
   Query: {
+    npmsIoPackage: (parent, { name }) => {
+      return (data = getNpmIOData(name));
+    },
     npmPackages: (_, { name }) => {
-      return npmSearch(name);
+      return npmSearch(name).then(res => {
+        return res.data;
+      });
     },
     minedPackageInfo: (_, args) => {
       return getCouchDbData(args.name).then(res => {
-        const mPackage = {
-          _id: res.data._id,
-          name: res.data.name,
-          github_repository: res.data.github_repository,
-          stars: res.data.stars,
-          escomplex: res.data.escomplex
-        };
-        return mPackage;
+        return res.data;
       });
     },
     frontPageStats: (parent, args) => {
@@ -58,6 +67,11 @@ const resolvers = {
           console.log(err);
         });
     }
+  },
+  MinedPackageInfo: {
+    gitHubRepo(minedPackage) {
+      return { data: { test: minedPackage.github_repository } };
+    }
   }
 };
 
@@ -67,10 +81,11 @@ const schema = makeExecutableSchema({
     Query,
     NpmPackage,
     MinedPackageInfo,
+    NpmIOPackage,
     FrontPageStats
-  ],
-  resolvers
+  ]
 });
+addResolveFunctionsToSchema(schema, resolvers);
 
 // Put together a schema
 module.exports = schema;
