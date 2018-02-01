@@ -42,8 +42,8 @@ const resolvers = {
       return (data = getNpmIOData(name));
     },
     npmPackages: (_, { name }) => {
-      return npmSearch(name).then(res => {
-        return res.data;
+      return npmSearch(name).then(data => {
+        return data;
       });
     },
     minedPackageInfo: (_, args) => {
@@ -58,7 +58,7 @@ const resolvers = {
       ])
         .then(([loc, topTen]) => {
           return (result = {
-            loc: loc.data.rows[0].value,
+            loc: loc.data.rows[0].value.sum,
             numOfPackages: topTen.data.total_rows,
             topTenStars: topTen.data.rows
           });
