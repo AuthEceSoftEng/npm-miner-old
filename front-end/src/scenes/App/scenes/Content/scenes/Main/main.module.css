@@ -1,0 +1,116 @@
+/* .container > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+} */
+
+.container {
+  height: 100%;
+  display: grid;
+  grid-gap: 0px;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: 100px 200px repeat(3, 1fr);
+
+  grid-template-areas: '. . . . i i i i . . . .' '. . . s s s s s s . . .'
+    '. . . t t t t t t . . .' '. . . t t t t t t . . .'
+    '. . . t t t t t t . . .';
+}
+
+.intro {
+  grid-area: i;
+  font-weight: 800;
+  text-align: center;
+}
+
+.search {
+  grid-area: s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
+  margin-top: 20px;
+}
+
+.searchResults {
+  z-index: 10;
+  background: linear-gradient(312deg, #14134e 0%, #512d5a 68%, #843b61 100%);
+  width: 400px;
+  border-radius: 25px;
+  text-align: center;
+  color: white;
+}
+
+ul {
+  list-style: none;
+  padding: 5px;
+  margin: auto 0;
+  margin: 15px;
+}
+
+li {
+  margin: 10px;
+  text-align: start;
+  color: white;
+  list-style: none;
+  border-bottom: 1px solid white;
+}
+
+li:hover {
+  background: linear-gradient(45deg, #282699 0%, #66077e 68%, #843b61 100%);
+  /* border: 1px solid white; */
+  border-radius: 10px;
+}
+
+ul:last-child {
+    padding-bottom: 30px;
+  }
+
+input {
+  border: 1px solid #14134e;
+  border-radius: 20px;
+  height: 40px;
+  width: 400px;
+  font-size: 20px;
+  text-align: center;
+}
+
+:focus {
+  outline-style: none;
+  box-shadow: 0 0 3pt 2pt #512d5a;
+}
+
+.statistics {
+  grid-area: t;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  flex-direction: row;
+  z-index: -1;
+}
+
+.statisticsBox {
+  box-shadow: 0 0 3pt 2pt #512d5a;
+  margin: 15px;
+  padding: 15px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-items: center;
+  align-content: center;
+}
+
+.statisticsBox > h2 {
+  margin: 15px;
+  border-bottom: 2px solid #14134e;
+}
+/*
+div > a, div > a:hover, div > a:focus {
+  color: aliceblue;
+  text-decoration: none;
+} */
+
+.plainText {
+  color: aliceblue;
+  text-decoration: none;
+}
