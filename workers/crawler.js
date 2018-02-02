@@ -6,7 +6,7 @@ const consts = require('./consts');
 
 const logger = bunyan.createLogger({ name: 'tracker' });
 const npmdb = require('nano')({
-  url: 'http://couchdb.npm-miner.com:5984/npm-registry',
+  url: 'http://couchdb.npm-miner.com:5984/npm-registry-2',
   agentOptions: {
     rejectUnauthorized: false
   }
@@ -19,13 +19,13 @@ const url =
 
 let myConn;
 let channel;
-const limit = 2000;
+const limit = 2200;
 const last_sequence_id = 'last_sequence';
 const q = 'filter';
 const _ = require('lodash');
 
 new CronJob(
-  '00 45 * * * *',
+  '00 15 * * * *',
   function() {
     // Get the latest change
     logger.info('It is time to track the changes');

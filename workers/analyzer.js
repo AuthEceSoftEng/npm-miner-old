@@ -12,7 +12,7 @@ const rimraf = require('rimraf');
 const _ = require('lodash');
 const GitHubApi = require('github');
 const npmdb = require('nano')({
-  url: 'http://couchdb.npm-miner.com:5984/npm-registry',
+  url: 'http://couchdb.npm-miner.com:5984/npm-registry-2',
   agentOptions: {
     rejectUnauthorized: false
   }
@@ -216,6 +216,7 @@ amqp
                   ) {
                     package._id = doc.name;
                     package.name = doc.name;
+                    package.date = Date.now();
                     const github_repository = doc.repository.url.match(
                       /https:[\/][\/]github[\.]com[\/][a-zA-Z0-9\-]+[\/][a-zA-Z0-9\-]+/g
                     )[0];
@@ -246,20 +247,21 @@ amqp
                           `[5] The package name in json is: ${json.name}`
                         );
                         if (json.name === package.name) {
-                          return github.repos.get({
-                            owner: user,
-                            repo: repo
-                          });
                         } else {
-                          package.error = 'Missmatch between npm and github';
-                          return Promise.reject(
-                            new Error({
-                              message: 'missmatch',
-                              detail:
-                                'Name in npm and name in repo is a missmatch or json cannot be parsed'
-                            })
-                          );
+                          package.error = 'name-missmatch';
                         }
+                        return request({
+                          url: `https://api.npms.io/v2/package/${package.name}`,
+                          json: true
+                        });
+                      })
+                      .then(json => {
+                        logger.info(`[6] The score is  ${json.score.final}`);
+                        package.npmsio = json;
+                        return github.repos.get({
+                          owner: user,
+                          repo: repo
+                        });
                       })
                       .then(res => {
                         logger.info(
@@ -275,13 +277,10 @@ amqp
                             `[7] Store package ${package.name} with ${res.data
                               .stargazers_count} GitHub stars!`
                           );
-                          return Promise.resolve('Starting the analysis');
                         } else {
-                          package.error = 'Redirect';
-                          return Promise.reject(
-                            new Error({ message: 'Redirect' })
-                          );
+                          package.error = 'redirect';
                         }
+                        return Promise.resolve('Starting the analysis');
                       })
                       .then(() => {
                         mkdirp.sync(dest);
@@ -298,6 +297,7 @@ amqp
                           request(url)
                             .pipe(fs.createWriteStream(tarzball))
                             .on('error', function(err) {
+                              console.log('error 1');
                               console.log(err);
                               reject(callback());
                             })
@@ -313,7 +313,7 @@ amqp
                                 function(err) {
                                   if (err) {
                                     console.log(err);
-                                    return reject('error');
+                                    return reject('error 2');
                                   } else {
                                     console.log('Done!');
                                     return resolve('Job done!');
@@ -408,10 +408,12 @@ amqp
                           logger.error(err);
                           return npmpackages.insertAsync(package);
                         } else {
+                          logger.info('Bucket error 1');
                           logger.error(err);
                         }
                       })
                       .catch(err => {
+                        logger.info('Bucket error 2');
                         logger.error(err);
                       });
                   } else {
