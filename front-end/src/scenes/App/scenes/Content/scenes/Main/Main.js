@@ -36,7 +36,7 @@ class Main extends Component {
                   {this.props.data.frontPageStats.topTenStars.map(v => {
                     return (
                       <tr className={styles.topTenStars} key={v.id}>
-                        <td>{v.value}</td>
+                        <td>{v.value[0]}</td>
                         <td>{v.key} stars</td>
                       </tr>
                     );

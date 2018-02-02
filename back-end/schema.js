@@ -54,7 +54,9 @@ const resolvers = {
     frontPageStats: (parent, args) => {
       return Promise.all([
         getCouchDbData('_design/analytics/_view/tloc'),
-        getCouchDbData('_design/analytics/_view/stars?descending=true&limit=10')
+        getCouchDbData(
+          '_design/analytics/_view/filteredStars?descending=true&limit=10'
+        )
       ])
         .then(([loc, topTen]) => {
           return (result = {
