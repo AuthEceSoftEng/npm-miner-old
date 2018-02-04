@@ -394,24 +394,24 @@ amqp
                           } else {
                             package.nsp = 0;
                           }
-                          // logger.info(`[14] Running jsinspect`);
-                          // shell
-                          //   .exec(
-                          //     `./node_modules/.bin/jsinspect --reporter default --ignore 'node_modules'
-                          //   ${path.join(localPath, 'package')}`,
-                          //     { silent: true }
-                          //   )
-                          //   .to(`jsinspect${pid}.out`);
-                          // const jsinspectAnalysis = shell.exec(
-                          //   `grep Match jsinspect${pid}.out | wc -l`,
-                          //   { silent: true }
-                          // ).stdout;
-                          // const numberOfDup = jsinspectAnalysis.replace(
-                          //   /\s/g,
-                          //   ''
-                          // );
-                          // logger.info(`Number of duplicates: ${numberOfDup}`);
-                          // package.jsinspect = numberOfDup;
+                          logger.info(`[14] Running jsinspect`);
+                          shell
+                            .exec(
+                              `./node_modules/.bin/jsinspect --reporter default --ignore 'node_modules'
+                            ${path.join(localPath, 'package')}`,
+                              { silent: true }
+                            )
+                            .to(`jsinspect${pid}.out`);
+                          const jsinspectAnalysis = shell.exec(
+                            `grep Match jsinspect${pid}.out | wc -l`,
+                            { silent: true }
+                          ).stdout;
+                          const numberOfDup = jsinspectAnalysis.replace(
+                            /\s/g,
+                            ''
+                          );
+                          logger.info(`Number of duplicates: ${numberOfDup}`);
+                          package.jsinspect = numberOfDup;
                           logger.info(`[15] Running sonarjs`);
                           // Run analyzer
                           return runSonarJS(
