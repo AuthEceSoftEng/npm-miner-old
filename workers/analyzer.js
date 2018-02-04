@@ -67,10 +67,28 @@ const logger = bunyan.createLogger({
   ]
 });
 
+// Function for logging purposes
+function log(message) {
+  console.log(message);
+}
+
+function onStart() {
+  console.log('Sonarjs analysis started');
+}
+
+function onEnd() {
+  console.log('Sonarjs analysis finished');
+}
+
 loggerWarn = logger.warn.bind(logger);
 
 async function runSonarJS(project_path, exclusions) {
-  const issues = await analyze(project_path, { exclusions: exclusions });
+  const issues = await analyze(project_path, {
+    log,
+    onStart,
+    onEnd,
+    exclusions: exclusions
+  });
   return issues;
 }
 
