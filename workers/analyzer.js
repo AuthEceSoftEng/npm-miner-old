@@ -2,6 +2,7 @@
 // Requires
 //
 const bunyan = require('bunyan');
+const { analyze } = require('sonarjs');
 const amqp = require('amqplib');
 const path = require('path');
 const fs = require('fs');
@@ -25,6 +26,7 @@ const npmpackages = require('nano')({
   }
 });
 Promise.promisifyAll(npmpackages);
+
 const request = require('request-promise');
 const shell = require('shelljs');
 const escomplex = require('escomplex');
@@ -66,6 +68,11 @@ const logger = bunyan.createLogger({
 });
 
 loggerWarn = logger.warn.bind(logger);
+
+async function runSonarJS(project_path, exclusions) {
+  const issues = await analyze(project_path, { exclusions: exclusions });
+  return issues;
+}
 
 const qin = 'filter';
 const url =
@@ -387,15 +394,43 @@ amqp
                           } else {
                             package.nsp = 0;
                           }
-                          logger.info(`[14] Cleaning up`);
-                          rimraf.sync(dest);
-                          return npmpackages.getAsync(job.package_name);
+                          logger.info(`[14] Running jsinspect`);
+                          shell
+                            .exec(
+                              `./node_modules/.bin/jsinspect --reporter default --ignore 'node_modules'
+                            ${path.join(localPath, 'package')}`,
+                              { silent: true }
+                            )
+                            .to(`jsinspect${pid}.out`);
+                          const jsinspectAnalysis = shell.exec(
+                            `grep Match jsinspect${pid}.out | wc -l`,
+                            { silent: true }
+                          ).stdout;
+                          const numberOfDup = jsinspectAnalysis.replace(
+                            /\s/g,
+                            ''
+                          );
+                          logger.info(`Number of duplicates: ${numberOfDup}`);
+                          package.jsinspect = numberOfDup;
+                          logger.info(`[15] Running sonarjs`);
+                          // Run analyzer
+                          return runSonarJS(
+                            path.join(localPath, 'package'),
+                            'node_modules'
+                          );
                         } else {
                           rimraf.sync(dest);
                           return Promise.reject(
                             'Too many files (more than 1000)'
                           );
                         }
+                      })
+                      .then(res => {
+                        logger.info(`SonarJS issues: ${res.length}`);
+                        package.sonarjs = res.length;
+                        logger.info(`[14] Cleaning up`);
+                        rimraf.sync(dest);
+                        return npmpackages.getAsync(job.package_name);
                       })
                       .then(res => {
                         package._rev = res._rev;
@@ -408,6 +443,7 @@ amqp
                           logger.error(err);
                           return npmpackages.insertAsync(package);
                         } else {
+                          rimraf.sync(dest);
                           logger.info('Bucket error 1');
                           logger.error(err);
                         }
