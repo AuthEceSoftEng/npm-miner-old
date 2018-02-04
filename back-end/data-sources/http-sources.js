@@ -11,8 +11,24 @@ const httpGet = R.curry((baseUrl, path, param) => {
   return axios.get(`${baseUrl}${path}${param}`);
 });
 
+const get = url => axios.get(url);
+
 const getCouchDbData = httpGet(COUCHDB_BASE_URL, 'npm-packages/');
 
 const getNpmIOData = httpGet(NPMIO_BASE_URL, `package/`);
 
-module.exports = { getCouchDbData, getNpmIOData };
+const gitHubData = httpGet(GITHUB_BASE_URL, `repos/`);
+
+const gitHubRepoToOwnerAndPackage = repo => {
+  return repo
+    .split('/')
+    .slice(-2)
+    .join('/');
+};
+
+module.exports = {
+  getCouchDbData,
+  getNpmIOData,
+  gitHubData,
+  gitHubRepoToOwnerAndPackage
+};

@@ -5,7 +5,13 @@ const MinedPackageInfo = `type MinedPackageInfo {
     name: String!
     github_repository: String
     stars: Int
-    escomplex : JSON
+    numOfFiles: Int,
+    minDirDepth: Int,
+    maxDirDepth: Int,
+    sumDirDepth: Int,
+    eslint: JSON,
+    escomplex : JSON,
+    nsp: Float,
     gitHubRepo: GitHubRepo
    }`;
 

@@ -2,7 +2,8 @@ const npmSearch = require('./data-sources/npm-search');
 const {
   getCouchDbData,
   getNpmIOData,
-  getGitHubData
+  gitHubData,
+  gitHubRepoToOwnerAndPackage
 } = require('./data-sources/http-sources');
 
 const NpmPackage = require('./schema-types/npm-package');
@@ -72,7 +73,11 @@ const resolvers = {
   },
   MinedPackageInfo: {
     gitHubRepo(minedPackage) {
-      return { data: { test: minedPackage.github_repository } };
+      return gitHubData(
+        gitHubRepoToOwnerAndPackage(minedPackage.github_repository)
+      ).then(res => {
+        return { data: res.data };
+      });
     }
   }
 };
