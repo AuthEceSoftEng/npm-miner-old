@@ -416,7 +416,7 @@ amqp
                           shell
                             .exec(
                               `./node_modules/.bin/jsinspect --reporter default --ignore 'node_modules'
-                            ${path.join(localPath, 'package')}`,
+                            ${localPath}`,
                               { silent: true }
                             )
                             .to(`jsinspect${pid}.out`);
@@ -432,10 +432,7 @@ amqp
                           package.jsinspect = numberOfDup;
                           logger.info(`[15] Running sonarjs`);
                           // Run analyzer
-                          return runSonarJS(
-                            path.join(localPath, 'package'),
-                            'node_modules'
-                          );
+                          return runSonarJS(localPath, 'node_modules');
                         } else {
                           rimraf.sync(dest);
                           return Promise.reject(
