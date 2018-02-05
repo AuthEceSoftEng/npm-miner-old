@@ -2,7 +2,6 @@ const { CronJob } = require('cron');
 const bunyan = require('bunyan');
 const amqp = require('amqplib');
 const Promise = require('bluebird');
-const consts = require('./consts');
 
 const logger = bunyan.createLogger({ name: 'tracker' });
 const npmdb = require('nano')({
@@ -19,7 +18,7 @@ const url =
 
 let myConn;
 let channel;
-const limit = 2200;
+const limit = 1000;
 const last_sequence_id = 'last_sequence';
 const q = 'filter';
 const _ = require('lodash');

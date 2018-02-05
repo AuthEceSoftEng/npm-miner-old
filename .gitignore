@@ -63,3 +63,5 @@ docker.retry
 .vscode
 
 workers/downloads*
+
+*.out
