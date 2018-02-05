@@ -2,13 +2,15 @@
 // Requires
 //
 const bunyan = require('bunyan');
-const { analyze } = require('sonarjs');
 const amqp = require('amqplib');
 const path = require('path');
 const fs = require('fs');
 const targz = require('targz');
 const mkdirp = require('mkdirp');
 const Promise = require('bluebird');
+Promise.config({
+  cancellation: true
+});
 const rimraf = require('rimraf');
 const _ = require('lodash');
 const GitHubApi = require('github');
@@ -26,28 +28,26 @@ const npmpackages = require('nano')({
   }
 });
 Promise.promisifyAll(npmpackages);
-
 const request = require('request-promise');
 const shell = require('shelljs');
+Promise.promisifyAll(shell);
 const escomplex = require('escomplex');
+const { analyze } = require('sonarjs');
 const { CLIEngine } = require('eslint');
 const glob = require('globby');
-const consts = require('./consts');
-
-function makeid() {
-  var text = '';
-  var possible =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-  for (var i = 0; i < 5; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-  return text;
-}
 
 //
 // Configuration and Variables
 //
+function makeid() {
+  var text = '';
+  var possible =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  for (var i = 0; i < 5; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  return text;
+}
+
 const pid = process.argv[2];
 //const pid = makeid();
 const logger = bunyan.createLogger({
@@ -69,28 +69,18 @@ const logger = bunyan.createLogger({
 
 // Function for logging purposes
 function log(message) {
-  console.log(message);
+  logger.info(message);
 }
 
 function onStart() {
-  console.log('Sonarjs analysis started');
+  logger.info('Sonarjs analysis started');
 }
 
 function onEnd() {
-  console.log('Sonarjs analysis finished');
+  logger.info('Sonarjs analysis finished');
 }
 
 loggerWarn = logger.warn.bind(logger);
-
-async function runSonarJS(project_path, exclusions) {
-  const issues = await analyze(project_path, {
-    log,
-    onStart,
-    onEnd,
-    exclusions: exclusions
-  });
-  return issues;
-}
 
 const qin = 'filter';
 const url =
@@ -206,6 +196,142 @@ function delay(t) {
   });
 }
 
+function eslintTask(paths) {
+  return new Promise((resolve, reject) => {
+    logger.info(`--- Running eslint ---`);
+    let result = cli.executeOnFiles(paths);
+    return resolve({
+      errorCount: result.errorCount,
+      warningCount: result.warningCount
+    });
+  });
+}
+
+function escomplexTask(paths) {
+  return new Promise((resolve, reject) => {
+    logger.info(`--- Running escomplex ---`);
+    const source = _.chain(paths)
+      .map(readCode)
+      .reject(['code', null])
+      .value();
+    let escomplexResult = escomplex.analyse(source, {
+      ignoreErrors: true
+    });
+    let tlocp = _.sumBy(
+      escomplexResult.reports,
+      o => o.aggregate.sloc.physical
+    );
+    let tlocl = _.sumBy(escomplexResult.reports, o => o.aggregate.sloc.logical);
+    return resolve({
+      firstOrderDensity: escomplexResult.firstOrderDensity,
+      changeCost: escomplexResult.changeCost,
+      coreSize: escomplexResult.coreSize,
+      loc: escomplexResult.loc,
+      cyclomatic: escomplexResult.cyclomatic,
+      effort: escomplexResult.effort,
+      params: escomplexResult.params,
+      maintainability: escomplexResult.maintainability,
+      tlocp,
+      tlocl
+    });
+  });
+}
+
+function nspTask(localPath) {
+  return new Promise((resolve, reject) => {
+    logger.info(`--- Running nsp ---`);
+    const nspAnalysis = shell.exec(
+      `./node_modules/.bin/nsp check ${path.join(
+        localPath,
+        'package'
+      )} --reporter json`,
+      { silent: true }
+    ).stdout;
+    if (nspAnalysis) {
+      return resolve(JSON.parse(nspAnalysis).length);
+    } else {
+      return resolve(0);
+    }
+  });
+}
+
+function jsinspectTask(localPath) {
+  return new Promise((resolve, reject) => {
+    logger.info(`--- Running jsinspect ---`);
+    shell
+      .exec(
+        `./node_modules/.bin/jsinspect -t 40 --reporter default --ignore 'node_modules'
+      ${localPath}`,
+        { silent: true }
+      )
+      .to(`jsinspect${pid}.out`);
+    const jsinspectAnalysis = shell.exec(
+      `grep Match jsinspect${pid}.out | wc -l`,
+      { silent: true }
+    ).stdout;
+    const numberOfDup = jsinspectAnalysis.replace(/\s/g, '');
+    return resolve(parseInt(numberOfDup));
+  });
+}
+
+async function runSonarJS(project_path, exclusions) {
+  const issues = await analyze(project_path, {
+    log,
+    onStart,
+    onEnd,
+    exclusions: exclusions
+  });
+  return issues;
+}
+
+function sonarjsTask(localPath, exclude = '') {
+  return new Promise((resolve, reject) => {
+    logger.info(`--- Running sonarjs ---`);
+    return resolve(runSonarJS(localPath, exclude));
+  });
+}
+
+function promiseAllTimeout(promises, timeout, resolvePartial = true) {
+  return new Promise(function(resolve, reject) {
+    let results = [],
+      finished = 0,
+      numPromises = promises.length;
+    let onFinish = function() {
+      if (finished < numPromises) {
+        if (resolvePartial) {
+          resolve(results);
+        } else {
+          throw new Error(
+            'Not all promises completed within the specified time'
+          );
+        }
+      } else {
+        resolve(results);
+      }
+      onFinish = null;
+    };
+    for (let i = 0; i < numPromises; i += 1) {
+      results[i] = undefined;
+      promises[i].then(function(res) {
+        results[i] = res;
+        finished += 1;
+        if (finished === numPromises && onFinish) {
+          onFinish();
+        }
+      }, reject);
+    }
+    setTimeout(function() {
+      if (onFinish) {
+        onFinish();
+      }
+    }, timeout);
+  });
+}
+
+// function sonarjsTask(localPath, exclude = "") {
+//   return resolve();
+// }
+
 // Work, work, work
 amqp
   .connect(url)
@@ -223,12 +349,13 @@ amqp
             if (msg !== null) {
               const job = JSON.parse(msg.content.toString());
               logger.info(`[1] Got job for package: ${job.package_name}`);
+              const package = {};
+              let localPath;
+              let paths;
               return npmdb
                 .getAsync(job.package_name)
                 .delay(2000)
                 .then(doc => {
-                  const package = {};
-                  let localPath;
                   logger.info(`[2] Retrieved: ${doc._id}`);
                   if (
                     doc.name &&
@@ -236,16 +363,18 @@ amqp
                     doc.repository &&
                     doc.repository.url &&
                     new RegExp(
-                      /https:[\/][\/]github[\.]com[\/][a-zA-Z0-9\-]+[\/][a-zA-Z0-9\-]+/g
+                      /[\/][\/]github[\.]com[\/][a-zA-Z0-9\-]+[\/][a-zA-Z0-9\-]+/g
                     ).test(doc.repository.url)
                   ) {
                     package._id = doc.name;
+                    package.error = '';
                     package.name = doc.name;
                     package.date = Date.now();
-                    const github_repository = doc.repository.url.match(
-                      /https:[\/][\/]github[\.]com[\/][a-zA-Z0-9\-]+[\/][a-zA-Z0-9\-]+/g
-                    )[0];
+                    const github_repository = `https:${doc.repository.url.match(
+                      /[\/][\/]github[\.]com[\/][a-zA-Z0-9\-]+[\/][a-zA-Z0-9\-]+/g
+                    )[0]}`;
                     package.github_repository = github_repository;
+                    logger.info(`[3] Identified repo: ${github_repository}`);
                     package.latest_package_json =
                       doc.versions[doc['dist-tags'].latest];
                     let split = package.github_repository.split('/');
@@ -254,230 +383,144 @@ amqp
                     logger.info(
                       `[3] Package name: ${package.name} of user: ${user} in repo: ${repo}`
                     );
-                    return github.repos
-                      .getContent({
+                    const tasks = [];
+                    tasks.push(
+                      request({
+                        url: `https://api.npms.io/v2/package/${package.name}`,
+                        json: true
+                      })
+                    );
+                    tasks.push(
+                      github.repos.get({
                         owner: user,
-                        repo: repo,
-                        path: 'package.json'
+                        repo: repo
                       })
-                      .then(res => {
-                        let download_url = res.data.download_url;
+                    );
+                    return Promise.all(tasks).then(res => {
+                      const npmsio = res[0];
+                      const github = res[1];
+                      logger.info(`[6] The score is  ${npmsio.score.final}`);
+                      package.npmsio = npmsio;
+                      logger.info(
+                        `[7] Stars ${user}/${repo}: ${github.data
+                          .stargazers_count}`
+                      );
+                      if (
+                        github.data.html_url.includes(user) &&
+                        github.data.html_url.includes(repo)
+                      ) {
+                        package.stars = github.data.stargazers_count;
                         logger.info(
-                          `[4] Downloading package.json from: ${download_url}`
+                          `[8] Store package ${package.name} with a repo of ${github
+                            .data.stargazers_count} GitHub stars!`
                         );
-                        return request({ uri: download_url, json: true });
-                      })
-                      .then(json => {
-                        logger.info(
-                          `[5] The package name in json is: ${json.name}`
-                        );
-                        if (json.name === package.name) {
-                        } else {
-                          package.error = 'name-missmatch';
-                        }
-                        return request({
-                          url: `https://api.npms.io/v2/package/${package.name}`,
-                          json: true
-                        });
-                      })
-                      .then(json => {
-                        logger.info(`[6] The score is  ${json.score.final}`);
-                        package.npmsio = json;
-                        return github.repos.get({
-                          owner: user,
-                          repo: repo
-                        });
-                      })
-                      .then(res => {
-                        logger.info(
-                          `[6] Stars ${user}/${repo}: ${res.data
-                            .stargazers_count}`
-                        );
-                        if (
-                          res.data.html_url.includes(user) &&
-                          res.data.html_url.includes(repo)
-                        ) {
-                          package.stars = res.data.stargazers_count;
-                          logger.info(
-                            `[7] Store package ${package.name} with ${res.data
-                              .stargazers_count} GitHub stars!`
-                          );
-                        } else {
-                          package.error = 'redirect';
-                        }
-                        return Promise.resolve('Starting the analysis');
-                      })
-                      .then(() => {
-                        mkdirp.sync(dest);
-                        const url = package.latest_package_json.dist.tarball;
-                        logger.info(`[8] Downloading tarball from: ${url}`);
-                        let filename = url.substr(url.lastIndexOf('/'));
-                        const tarzball = path.join(dest, filename);
-                        const targetDir = path.join(
-                          dest,
-                          filename.slice(0, -4)
-                        );
-                        localPath = targetDir;
-                        return new Promise((resolve, reject) => {
-                          request(url)
-                            .pipe(fs.createWriteStream(tarzball))
-                            .on('error', function(err) {
-                              console.log('error 1');
-                              console.log(err);
-                              reject(callback());
-                            })
-                            .on('end', () => {
-                              console.log('the end');
-                            })
-                            .on('finish', function() {
-                              targz.decompress(
-                                {
-                                  src: tarzball,
-                                  dest: targetDir
-                                },
-                                function(err) {
-                                  if (err) {
-                                    console.log(err);
-                                    return reject('error 2');
-                                  } else {
-                                    console.log('Done!');
-                                    return resolve('Job done!');
-                                  }
+                      } else {
+                        package.error = 'redirect';
+                      }
+                      mkdirp.sync(dest);
+                      const url = package.latest_package_json.dist.tarball;
+                      logger.info(`[9] Downloading tarball from: ${url}`);
+                      let filename = url.substr(url.lastIndexOf('/'));
+                      const tarzball = path.join(dest, filename);
+                      const targetDir = path.join(dest, filename.slice(0, -4));
+                      localPath = targetDir;
+                      return new Promise((resolve, reject) => {
+                        request(url)
+                          .pipe(fs.createWriteStream(tarzball))
+                          .on('error', function(err) {
+                            console.log('error 1');
+                            console.log(err);
+                            reject(callback());
+                          })
+                          .on('end', () => {
+                            console.log('the end');
+                          })
+                          .on('finish', function() {
+                            targz.decompress(
+                              {
+                                src: tarzball,
+                                dest: targetDir
+                              },
+                              function(err) {
+                                if (err) {
+                                  console.log(err);
+                                  return reject('error 2');
+                                } else {
+                                  console.log('Done!');
+                                  return resolve('Job done!');
                                 }
-                              );
-                            });
-                        });
-                      })
-                      .then(() => {
-                        logger.info(`[9] Starting analysis on ${package._id}`);
-                        return glob(createGlobbyPattern(localPath), {
-                          nodir: true
-                        });
-                      })
-                      .then(paths => {
-                        logger.info(`[10] Files identified: ${paths.length}`);
-                        if (paths.length <= 1000) {
-                          package.numOfFiles = paths.length;
-                          const directories = _.map(paths, path => {
-                            return path.split('/').length - 4;
+                              }
+                            );
                           });
-                          package.minDirDepth = _.min(directories);
-                          package.maxDirDepth = _.max(directories);
-                          package.sumDirDepth = _.sum(directories);
-                          logger.info(`[11] Running eslint`);
-                          let result = cli.executeOnFiles(paths);
-                          package.eslint = {
-                            errorCount: result.errorCount,
-                            warningCount: result.warningCount
-                          };
-                          logger.info(`[12] Running escomplex`);
-                          const source = _.chain(paths)
-                            .map(readCode)
-                            .reject(['code', null])
-                            .value();
-                          let escomplexResult = escomplex.analyse(source, {
-                            ignoreErrors: true
-                          });
-                          let tlocp = _.sumBy(
-                            escomplexResult.reports,
-                            o => o.aggregate.sloc.physical
-                          );
-                          let tlocl = _.sumBy(
-                            escomplexResult.reports,
-                            o => o.aggregate.sloc.logical
-                          );
-                          package.escomplex = {
-                            firstOrderDensity:
-                              escomplexResult.firstOrderDensity,
-                            changeCost: escomplexResult.changeCost,
-                            coreSize: escomplexResult.coreSize,
-                            loc: escomplexResult.loc,
-                            cyclomatic: escomplexResult.cyclomatic,
-                            effort: escomplexResult.effort,
-                            params: escomplexResult.params,
-                            maintainability: escomplexResult.maintainability,
-                            tlocp,
-                            tlocl
-                          };
-                          logger.info(`[13] Running nsp`);
-                          const nspAnalysis = shell.exec(
-                            `./node_modules/.bin/nsp check ${path.join(
-                              localPath,
-                              'package'
-                            )} --reporter json`,
-                            { silent: true }
-                          ).stdout;
-                          if (nspAnalysis) {
-                            package.nsp = JSON.parse(nspAnalysis).length;
-                          } else {
-                            package.nsp = 0;
-                          }
-                          logger.info(`[14] Running jsinspect`);
-                          shell
-                            .exec(
-                              `./node_modules/.bin/jsinspect --reporter default --ignore 'node_modules'
-                            ${localPath}`,
-                              { silent: true }
-                            )
-                            .to(`jsinspect${pid}.out`);
-                          const jsinspectAnalysis = shell.exec(
-                            `grep Match jsinspect${pid}.out | wc -l`,
-                            { silent: true }
-                          ).stdout;
-                          const numberOfDup = jsinspectAnalysis.replace(
-                            /\s/g,
-                            ''
-                          );
-                          logger.info(`Number of duplicates: ${numberOfDup}`);
-                          package.jsinspect = numberOfDup;
-                          logger.info(`[15] Running sonarjs`);
-                          // Run analyzer
-                          return runSonarJS(localPath, 'node_modules');
-                        } else {
-                          rimraf.sync(dest);
-                          return Promise.reject(
-                            'Too many files (more than 1000)'
-                          );
-                        }
-                      })
-                      .then(res => {
-                        logger.info(`SonarJS issues: ${res.length}`);
-                        package.sonarjs = res.length;
-                        logger.info(`[14] Cleaning up`);
-                        rimraf.sync(dest);
-                        return npmpackages.getAsync(job.package_name);
-                      })
-                      .then(res => {
-                        package._rev = res._rev;
-                        logger.info('[End] New package added (updated)!');
-                        return npmpackages.insertAsync(package);
-                      })
-                      .catch(err => {
-                        if (err.message === 'missing') {
-                          logger.info('[End] New package added (created)!');
-                          logger.error(err);
-                          return npmpackages.insertAsync(package);
-                        } else {
-                          rimraf.sync(dest);
-                          logger.info('Bucket error 1');
-                          logger.error(err);
-                        }
-                      })
-                      .catch(err => {
-                        logger.info('Bucket error 2');
-                        logger.error(err);
                       });
+                    });
                   } else {
                     return Promise.reject(
                       'Not able to connect to github due to parsed URL'
                     );
                   }
                 })
+                .then(() => {
+                  logger.info(`[9] Starting analysis on ${package._id}`);
+                  return glob(createGlobbyPattern(localPath), {
+                    nodir: true
+                  });
+                })
+                .then(paths => {
+                  paths = paths;
+                  logger.info(`[10] Files identified: ${paths.length}`);
+                  package.numOfFiles = paths.length;
+                  const directories = _.map(paths, path => {
+                    return path.split('/').length - 4;
+                  });
+                  package.minDirDepth = _.min(directories);
+                  package.maxDirDepth = _.max(directories);
+                  package.sumDirDepth = _.sum(directories);
+                  return eslintTask(paths);
+                })
+                .then(res => {
+                  if (res) package.eslint = res;
+                  return escomplexTask(paths);
+                })
+                .then(res => {
+                  if (res) package.escomplex = res;
+                  logger.info(res);
+                  return nspTask(localPath);
+                })
+                .then(res => {
+                  if (res) package.nsp = res;
+                  logger.info(res);
+                  return jsinspectTask(localPath);
+                })
+                .then(res => {
+                  if (res) package.jsinspect = res;
+                  logger.info(res);
+                  return sonarjsTask(localPath, ['node_modules', 'dist']);
+                })
+                .then(res => {
+                  if (res) package.sonarjs = res.length;
+                  logger.info(res);
+                  logger.info('Finished all');
+                  rimraf.sync(dest);
+                  return npmpackages.getAsync(job.package_name);
+                })
+                .then(res => {
+                  package._rev = res._rev;
+                  logger.info('[End] New package added (updated)!');
+                  return npmpackages.insertAsync(package);
+                })
                 .catch(err => {
-                  console.error(err);
-                  if (err.message == 'Not Found') {
-                    package.error = 'not-found';
-                    logger.error('Repo not found in github parsed URL');
+                  if (err.message === 'missing') {
+                    logger.info('[Error] New package added (created)!');
+                    logger.error(err);
+                    return npmpackages.insertAsync(package);
+                  } else if (err.message === 'operation timed out') {
+                    logger.info('[Error] Timeout!');
+                    rimraf.sync(dest);
+                  } else {
+                    rimraf.sync(dest);
+                    logger.info('[Error] Something happened');
+                    logger.error(err);
                   }
                 })
                 .finally(() => {
