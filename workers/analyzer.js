@@ -499,7 +499,7 @@ amqp
                 })
                 .then(res => {
                   if (res) package.sonarjs = res.length;
-                  logger.info(res);
+                  logger.info(res.length);
                   logger.info('Finished all');
                   rimraf.sync(dest);
                   return npmpackages.getAsync(job.package_name);
