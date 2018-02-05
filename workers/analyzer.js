@@ -498,27 +498,26 @@ amqp
                   return sonarjsTask(localPath, ['node_modules', 'dist']);
                 })
                 .then(res => {
-                  if (res) package.sonarjs = res.length;
-                  logger.info(res.length);
+                  if (res) {
+                    package.sonarjs = res.length;
+                    logger.info(res.length);
+                  }
                   logger.info('Finished all');
-                  rimraf.sync(dest);
                   return npmpackages.getAsync(job.package_name);
                 })
                 .then(res => {
                   package._rev = res._rev;
-                  logger.info('[End] New package added (updated)!');
+                  logger.info('[End] Package inserted (updated)!');
+                  rimraf.sync(dest);
                   return npmpackages.insertAsync(package);
                 })
                 .catch(err => {
+                  rimraf.sync(dest);
                   if (err.message === 'missing') {
-                    logger.info('[Error] New package added (created)!');
+                    logger.info('[Error] Package inserted (created)!');
                     logger.error(err);
                     return npmpackages.insertAsync(package);
-                  } else if (err.message === 'operation timed out') {
-                    logger.info('[Error] Timeout!');
-                    rimraf.sync(dest);
                   } else {
-                    rimraf.sync(dest);
                     logger.info('[Error] Something happened');
                     logger.error(err);
                   }
