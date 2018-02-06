@@ -14,13 +14,14 @@ import { ApolloProvider } from 'react-apollo';
 
 const client = new ApolloClient({
   link: new HttpLink({
-    uri: process.env.REACT_APP_GRAPHQL_SERVER_ADRESS
+    uri: process.env.REACT_APP_GRAPHQL_SERVER_ADDRESS
   }),
   cache: new InMemoryCache()
 });
 
 class App extends Component {
   render() {
+    console.log(process.env.REACT_APP_GRAPHQL_SERVER_ADDRESS);
     return (
       <Router>
         <ApolloProvider client={client}>

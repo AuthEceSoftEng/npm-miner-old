@@ -13,7 +13,7 @@ RUN npm install
 EXPOSE 3000
 
 # Define environment variable
-#ENV NAME World
+ENV REACT_APP_GRAPHQL_SERVER_ADDRESS 'http://localhost:3000/graphql'
 
 # Run npm start when the container launches
 CMD ["npm", "start"]
