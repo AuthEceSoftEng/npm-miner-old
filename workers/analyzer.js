@@ -495,13 +495,14 @@ amqp
                 .then(res => {
                   if (res) package.jsinspect = res;
                   logger.info(res);
-                  return sonarjsTask(localPath, ['node_modules', 'dist']);
-                })
-                .then(res => {
-                  if (res) {
-                    package.sonarjs = res.length;
-                    logger.info(res.length);
-                  }
+                  //   return sonarjsTask(localPath, ['node_modules', 'dist']);
+                  // })
+                  // .then(res => {
+                  //   if (res) {
+                  //     package.sonarjs = res.length;
+                  //     logger.info(res.length);
+                  //   }
+                  package.sonarjs = 0;
                   logger.info('Finished all');
                   return npmpackages.getAsync(job.package_name);
                 })

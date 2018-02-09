@@ -18,7 +18,7 @@ const url =
 
 let myConn;
 let channel;
-const limit = 1000;
+const limit = 2000;
 const last_sequence_id = 'last_sequence';
 const q = 'filter';
 const _ = require('lodash');
