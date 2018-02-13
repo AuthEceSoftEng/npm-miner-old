@@ -5,6 +5,7 @@ const bunyan = require('bunyan');
 const amqp = require('amqplib');
 const path = require('path');
 const fs = require('fs');
+const sloc = require('sloc');
 const targz = require('targz');
 const mkdirp = require('mkdirp');
 const Promise = require('bluebird');
@@ -31,6 +32,8 @@ Promise.promisifyAll(npmpackages);
 const request = require('request-promise');
 const shell = require('shelljs');
 Promise.promisifyAll(shell);
+Promise.promisifyAll(fs);
+Promise.promisifyAll(sloc);
 const escomplex = require('escomplex');
 const { analyze } = require('sonarjs');
 const { CLIEngine } = require('eslint');
@@ -291,6 +294,22 @@ function sonarjsTask(localPath, exclude = '') {
   });
 }
 
+function countFileLines(path) {
+  fs
+    .readFileAsync(path, 'utf8')
+    .then(code => {
+      const stats = sloc(code, 'js');
+      for (i in sloc.keys) {
+        var k = sloc.keys[i];
+        console.log(k + ' : ' + stats[k]);
+      }
+      return resolve(stats);
+    })
+    .catch(err => {
+      reject(err);
+    });
+}
+
 function promiseAllTimeout(promises, timeout, resolvePartial = true) {
   return new Promise(function(resolve, reject) {
     let results = [],
@@ -466,8 +485,8 @@ amqp
                     nodir: true
                   });
                 })
-                .then(paths => {
-                  paths = paths;
+                .then(filepaths => {
+                  paths = filepaths;
                   logger.info(`[10] Files identified: ${paths.length}`);
                   package.numOfFiles = paths.length;
                   const directories = _.map(paths, path => {
@@ -476,6 +495,25 @@ amqp
                   package.minDirDepth = _.min(directories);
                   package.maxDirDepth = _.max(directories);
                   package.sumDirDepth = _.sum(directories);
+                  return _.chain(paths)
+                    .map(file => {
+                      const lines = shell
+                        .exec(`wc -l ${file}`, { silent: true })
+                        .stdout.trim()
+                        .split(' ')[0];
+                      // const name = file.substring(file.indexOf('/code/') + '/code/'.length);
+                      const name = file;
+                      logger.info(file);
+                      return {
+                        name,
+                        lines: parseInt(lines, 10)
+                      };
+                    })
+                    .sumBy('lines')
+                    .value();
+                })
+                .then(lines => {
+                  logger.info(`Number of lines: ${lines}`);
                   return eslintTask(paths);
                 })
                 .then(res => {
