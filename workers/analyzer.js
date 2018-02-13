@@ -489,12 +489,12 @@ amqp
                 })
                 .then(res => {
                   if (res) package.nsp = res;
-                  logger.info(res);
-                  return jsinspectTask(localPath);
-                })
-                .then(res => {
-                  if (res) package.jsinspect = res;
-                  logger.info(res);
+                  //   logger.info(res);
+                  //   return jsinspectTask(localPath);
+                  // })
+                  // .then(res => {
+                  //   if (res) package.jsinspect = res;
+                  //   logger.info(res);
                   //   return sonarjsTask(localPath, ['node_modules', 'dist']);
                   // })
                   // .then(res => {
@@ -502,7 +502,8 @@ amqp
                   //     package.sonarjs = res.length;
                   //     logger.info(res.length);
                   //   }
-                  package.sonarjs = 0;
+                  package.jsinspect = -1;
+                  package.sonarjs = -1;
                   logger.info('Finished all');
                   return npmpackages.getAsync(job.package_name);
                 })
