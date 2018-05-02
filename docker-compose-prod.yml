@@ -21,7 +21,7 @@ services:
     depends_on:
       - front-end
     build:
-      context: ./nginx
+      context: ./nginx.prod
     ports:
       - "80:80"
 
