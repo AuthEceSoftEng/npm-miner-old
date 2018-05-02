@@ -18,7 +18,7 @@ services:
       REACT_APP_GRAPHQL_SERVER_ADDRESS: 'http://npm-miner.com:3000/graphql'
   nginx:
     image: nginx:alpine
-    links:
+    depends_on:
       - front-end
     build:
       context: ./nginx
