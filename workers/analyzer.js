@@ -489,32 +489,40 @@ amqp
                   paths = filepaths;
                   logger.info(`[10] Files identified: ${paths.length}`);
                   package.numOfFiles = paths.length;
-                  const directories = _.map(paths, path => {
-                    return path.split('/').length - 4;
-                  });
-                  package.minDirDepth = _.min(directories);
-                  package.maxDirDepth = _.max(directories);
-                  package.sumDirDepth = _.sum(directories);
-                  return _.chain(paths)
-                    .map(file => {
-                      const lines = shell
-                        .exec(`wc -l ${file}`, { silent: true })
-                        .stdout.trim()
-                        .split(' ')[0];
-                      // const name = file.substring(file.indexOf('/code/') + '/code/'.length);
-                      const name = file;
-                      logger.info(file);
-                      return {
-                        name,
-                        lines: parseInt(lines, 10)
-                      };
-                    })
-                    .sumBy('lines')
-                    .value();
+                  if (path.length > 1000) {
+                    return Promise.reject('More than 1000 files');
+                  } else {
+                    const directories = _.map(paths, path => {
+                      return path.split('/').length - 4;
+                    });
+                    package.minDirDepth = _.min(directories);
+                    package.maxDirDepth = _.max(directories);
+                    package.sumDirDepth = _.sum(directories);
+                    return _.chain(paths)
+                      .map(file => {
+                        const lines = shell
+                          .exec(`wc -l ${file}`, { silent: true })
+                          .stdout.trim()
+                          .split(' ')[0];
+                        // const name = file.substring(file.indexOf('/code/') + '/code/'.length);
+                        const name = file;
+                        logger.info(file);
+                        return {
+                          name,
+                          lines: parseInt(lines, 10)
+                        };
+                      })
+                      .sumBy('lines')
+                      .value();
+                  }
                 })
                 .then(lines => {
-                  logger.info(`Number of lines: ${lines}`);
-                  return eslintTask(paths);
+                  if (lines > 1000000) {
+                    return Promise.reject('More than 1000 files');
+                  } else {
+                    logger.info(`Number of lines: ${lines}`);
+                    return eslintTask(paths);
+                  }
                 })
                 .then(res => {
                   if (res) package.eslint = res;
