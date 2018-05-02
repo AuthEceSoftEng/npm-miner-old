@@ -56,7 +56,7 @@ const resolvers = {
       return Promise.all([
         getCouchDbData('_design/results/_view/tloc'),
         getCouchDbData(
-          '_design/filters/_view/filteredStars?descending=true&limit=10'
+          '_design/filters/_view/filteredStars?descending=true&limit=10&stale=ok'
         )
       ])
         .then(([loc, topTen]) => {

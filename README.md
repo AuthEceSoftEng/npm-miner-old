@@ -14,7 +14,7 @@ Development:
 
 Production
 
-    docker-compose up -d -f docker-compose-prod.yml
+    docker-compose -f docker-compose-prod.yml up -d
 
 ### rabbit
 
