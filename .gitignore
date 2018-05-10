@@ -65,3 +65,5 @@ docker.retry
 workers/downloads*
 
 *.out
+
+.DS_Store

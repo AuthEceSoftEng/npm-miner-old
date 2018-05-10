@@ -1,0 +1,13 @@
+.Site {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.Site-content {
+  flex: 1;
+}
+
+.mb-10 {
+ margin-bottom: 10px;
+}
