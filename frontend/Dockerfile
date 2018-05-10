@@ -1,10 +1,10 @@
 FROM node:alpine
 
 # Set the working directory to /app
-WORKDIR /app/
+WORKDIR /app
 
 # Copy the current directory contents into the container at /app
-#ADD . /app
+ADD . /app
 
 # Install any needed packages specified in package.json
 RUN npm install
@@ -13,7 +13,7 @@ RUN npm install
 EXPOSE 3000
 
 # Define environment variable
-ENV REACT_APP_GRAPHQL_SERVER_ADDRESS 'http://localhost:3000/graphql'
+#ENV REACT_APP_GRAPHQL_SERVER_ADDRESS 'http://localhost:3000/graphql'
 
 # Run npm start when the container launches
 CMD ["npm", "start"]
