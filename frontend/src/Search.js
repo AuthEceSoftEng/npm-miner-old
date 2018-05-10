@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link, Route } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import queryString from 'query-string'
 import { graphql } from 'react-apollo';
 import gql from 'graphql-tag';

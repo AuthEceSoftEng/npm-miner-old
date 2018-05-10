@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Route } from 'react-router-dom';
 import { BeatLoader } from 'react-spinners';
 import MinedInfo from './MinedInfo';
 import NpmsioInfo from './NpmsioInfo';

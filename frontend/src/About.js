@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import { Route } from 'react-router-dom';
-// import styles from './content.module.css';
 
 class About extends Component {
   render() {
