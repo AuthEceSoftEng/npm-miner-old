@@ -4,11 +4,11 @@ import './Header.css'
 
 const Header = ({ siteTitle }) => (
     <header>
-        <nav className="navbar is-black" role="navigation" aria-label="main navigation">
+        <nav className="navbar is-black" aria-label="main navigation">
           <div className='container'>
             <div className="navbar-brand">
               <Link className="navbar-item" to="/">
-                <img src='/logo_white_colour.png' height='110%'/>
+                <img src='/logo_white_colour.png' height='110%' alt='npm-miner'/>
               </Link>
               <a role="button" className="navbar-burger" aria-label="menu" aria-expanded="false">
                 <span aria-hidden="true"></span>

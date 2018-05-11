@@ -14,9 +14,8 @@ services:
       - ./frontend:/app/
     ports:
       - '3001:3000'
-    environment:
-      REACT_APP_GRAPHQL_SERVER_ADDRESS: 'http://localhost:3000/graphql'
-      NODE_ENV: 'development'
+    env_file:
+      - ./dev.env
   nginx:
     image: nginx:alpine
     links:

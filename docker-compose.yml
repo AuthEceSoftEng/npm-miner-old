@@ -14,9 +14,8 @@ services:
       - ./frontend:/app/
     ports:
       - '3001:3000'
-    environment:
-      REACT_APP_GRAPHQL_SERVER_ADDRESS: 'http://npm-miner.com:3000/graphql'
-      NODE_ENV: 'production'
+    env_file:
+      - ./prod.env
   nginx:
     image: nginx:alpine
     volumes:
