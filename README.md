@@ -10,11 +10,23 @@ Static code analysis of npm registry. Available at: http://npm-miner.com
 
 Development:
 
-    docker-compose up
+Start:
+
+    docker-compose -f docker-compose-dev.yml up --build
+
+Stop:
+
+    Ctrl-C
 
 Production
 
-    docker-compose -f docker-compose-prod.yml up -d
+Start:
+
+    docker-compose up -d
+
+Stop:
+
+    docker-compose down
 
 ### rabbit
 

@@ -1,8 +1,8 @@
 import GoogleAnalytics from 'react-ga';
 
 export default function initGA() {
-    console.log(process.env.NODE_ENV)
-    if (process.env.NODE_ENV === 'production') {
+    const hostname = window && window.location && window.location.hostname;
+    if (hostname === 'npm-miner.com') {
         GoogleAnalytics.initialize('UA-17339437-5')
     }
 }
