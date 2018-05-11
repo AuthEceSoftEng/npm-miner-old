@@ -2,16 +2,16 @@ version: '3'
 services:
   back-end:
     build:
-      context: ./backend
+      context: ./back-end
     volumes:
-      - ./backend:/app/
+      - ./back-end:/app/
     ports:
       - '3000:3000'
   front-end:
     build:
-      context: ./frontend
+      context: ./front-end
     volumes:
-      - ./frontend:/app/
+      - ./front-end:/app/
     ports:
       - '3001:3000'
     env_file:
